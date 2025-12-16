@@ -1,0 +1,2853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理年龄测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 欢迎页面样式 */
+        .welcome-content {
+            text-align: center;
+        }
+
+        .welcome-content h1 {
+            font-size: 2.2em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* 测试卡片网格布局 */
+        .tests-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .test-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .test-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .test-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+
+        .test-card.personality .test-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .test-card.marriage .test-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .test-card.animal .test-icon {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+
+        .test-card.color .test-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .test-card.answerbook .test-icon {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+        }
+
+        .test-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .test-card.personality .test-badge {
+            background: #e8ebf5;
+            color: #667eea;
+        }
+
+        .test-card.marriage .test-badge {
+            background: #ffe8f0;
+            color: #f5576c;
+        }
+
+        .test-card.animal .test-badge {
+            background: #e0f7f4;
+            color: #44a08d;
+        }
+
+        .test-card.color .test-badge {
+            background: #ffe8f0;
+            color: #f5576c;
+        }
+
+        .test-card.answerbook .test-badge {
+            background: #fff4e6;
+            color: #d4880f;
+        }
+
+        .test-card-title-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .test-card h3 {
+            font-size: 1.15em;
+            color: #333;
+            margin: 0 0 4px 0;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        .test-card p {
+            color: #666;
+            line-height: 1.5;
+            font-size: 0.85em;
+            margin: 0 0 10px 0;
+        }
+
+        .test-card .start-arrow {
+            display: inline-flex;
+            align-items: center;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .test-card.marriage .start-arrow {
+            color: #f5576c;
+        }
+
+        .test-card.animal .start-arrow {
+            color: #44a08d;
+        }
+
+        .test-card.color .start-arrow {
+            color: #f5576c;
+        }
+
+        .test-card.answerbook .start-arrow {
+            color: #d4880f;
+        }
+
+        .test-card .start-arrow::after {
+            content: '→';
+            margin-left: 8px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .test-card:hover .start-arrow::after {
+            margin-left: 12px;
+        }
+
+        .loading-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+            background: #f8f9ff;
+            border: 2px dashed #d0d5f6;
+        }
+
+        .loading-card .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .loading-card p {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-text {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+
+        .btn-text:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 测试页面样式 */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .question-counter {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .question-container {
+            margin: 40px 0;
+            min-height: 300px;
+        }
+
+        .question-text {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            color: #333;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+
+        .option-btn.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 20px;
+        }
+
+        .test-restart-container {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .test-restart-container button {
+            font-weight: 500;
+        }
+
+        /* 自定义确认对话框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+            text-align: center;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h3 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            max-width: 150px;
+        }
+
+        /* 授权验证对话框特殊样式 */
+        .auth-modal {
+            max-width: 500px;
+        }
+
+        .auth-description {
+            font-size: 1em;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .auth-error {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            min-height: 20px;
+            text-align: center;
+        }
+
+        .auth-loading {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .auth-loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .auth-loading p {
+            margin-top: 15px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* 结果页面样式 */
+        .result-content {
+            text-align: center;
+        }
+
+        .result-content h1 {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                transform: translate(0, 0);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translate(-10%, -10%);
+                opacity: 0.8;
+            }
+        }
+
+        .mental-age-display {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            flex-wrap: nowrap;
+        }
+
+        .mental-age-display .label {
+            font-size: 1.5em;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .mental-age {
+            font-size: 5.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            animation: scaleIn 0.8s ease-out;
+            line-height: 1;
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .age-comparison {
+            font-size: 1.4em;
+            font-weight: 600;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .analysis-card, .dimensions-card {
+            background: #f8f9ff;
+            padding: 35px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+            text-align: left;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .analysis-card:hover, .dimensions-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+        }
+
+        .analysis-card h3, .dimensions-card h3 {
+            color: #667eea;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+            padding-bottom: 12px;
+        }
+
+        .analysis-card h3::after, .dimensions-card h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .personality-text {
+            color: #555;
+            line-height: 1.9;
+            font-size: 1.15em;
+            text-align: justify;
+            padding: 0 10px;
+        }
+
+        .dimensions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .dimension-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.5s ease-out backwards;
+        }
+
+        .dimension-item:nth-child(1) { animation-delay: 0.1s; }
+        .dimension-item:nth-child(2) { animation-delay: 0.2s; }
+        .dimension-item:nth-child(3) { animation-delay: 0.3s; }
+        .dimension-item:nth-child(4) { animation-delay: 0.4s; }
+        .dimension-item:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .dimension-label {
+            min-width: 120px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.05em;
+        }
+
+        .dimension-bar {
+            flex: 1;
+            height: 35px;
+            background: #e8ebf5;
+            border-radius: 18px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .dimension-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 18px;
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.95em;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            position: relative;
+        }
+
+        .dimension-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .dimension-score {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 颜色选择页面样式 */
+        .color-selection-page {
+            text-align: center;
+        }
+
+        .color-instruction {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .color-item {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .color-item.selected {
+            border-color: #667eea;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .color-item.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #667eea;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .color-circle {
+            width: 60%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .color-name {
+            font-size: 0.85em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .color-number {
+            font-size: 0.75em;
+            color: #999;
+        }
+
+        .selected-count {
+            text-align: center;
+            font-size: 1em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .tests-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tests-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .page {
+                padding: 18px;
+                border-radius: 16px;
+            }
+
+            .welcome-content h1 {
+                font-size: 1.5em;
+                margin-bottom: 6px;
+            }
+
+            .subtitle {
+                font-size: 0.85em;
+                margin-bottom: 20px;
+            }
+
+            .tests-grid {
+                gap: 12px;
+                margin-top: 15px;
+            }
+
+            .test-card {
+                padding: 14px;
+                border-radius: 12px;
+            }
+
+            .test-card-header {
+                gap: 10px;
+                margin-bottom: 8px;
+            }
+
+            .test-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 1.2em;
+                border-radius: 10px;
+            }
+
+            .test-badge {
+                padding: 2px 8px;
+                font-size: 0.65em;
+            }
+
+            .test-card h3 {
+                font-size: 1em;
+                margin: 2px 0 0 0;
+            }
+
+            .test-card p {
+                font-size: 0.78em;
+                line-height: 1.4;
+                margin: 0 0 8px 0;
+            }
+
+            .test-card .start-arrow {
+                font-size: 0.82em;
+            }
+
+            /* 答题页面优化 */
+            .progress-bar {
+                height: 6px;
+                margin-bottom: 15px;
+            }
+
+            .question-counter {
+                font-size: 1em;
+                margin-bottom: 20px;
+            }
+
+            .question-container {
+                margin: 25px 0;
+                min-height: auto;
+            }
+
+            .question-text {
+                font-size: 1.15em;
+                margin-bottom: 20px;
+                line-height: 1.4;
+            }
+
+            .options-container {
+                gap: 10px;
+            }
+
+            .option-btn {
+                padding: 14px;
+                border-radius: 12px;
+                font-size: 0.95em;
+            }
+
+            .navigation-buttons {
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .btn-secondary, .btn-primary {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 0.95em;
+            }
+
+            .test-restart-container {
+                margin-top: 20px;
+                padding-top: 20px;
+            }
+
+            /* 结果页面优化 */
+            .result-content h1 {
+                font-size: 1.4em;
+                margin-bottom: 15px;
+            }
+
+            .result-card {
+                padding: 30px 20px !important;
+                margin-bottom: 15px;
+            }
+
+            .mental-age-display {
+                flex-wrap: nowrap !important;
+                gap: 5px;
+            }
+
+            .mental-age-display .label {
+                font-size: 1em;
+            }
+
+            .mental-age {
+                font-size: 2.8em;
+            }
+
+            .age-comparison {
+                font-size: 1.1em;
+            }
+
+            .analysis-card, .dimensions-card {
+                padding: 18px !important;
+                margin-bottom: 15px;
+            }
+
+            .analysis-card h3, .dimensions-card h3 {
+                font-size: 1.15em;
+                margin-bottom: 12px;
+            }
+
+            .personality-text {
+                font-size: 0.85em;
+                line-height: 1.6;
+            }
+
+            .dimension-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .dimension-label {
+                min-width: auto;
+                width: 100%;
+                font-size: 0.95em;
+            }
+
+            .dimension-bar {
+                width: 100%;
+                height: 30px;
+            }
+
+            .dimension-fill {
+                font-size: 0.85em;
+                padding-right: 10px;
+            }
+
+            /* 动物城结果页面手机优化 */
+            #animal-result-page .result-content h1 {
+                font-size: 1.4em !important;
+                margin-bottom: 12px !important;
+            }
+
+            #animal-result-card {
+                padding: 28px 20px !important;
+                margin-bottom: 15px !important;
+            }
+
+            #animal-emoji {
+                font-size: 3.5em !important;
+                margin-bottom: 12px !important;
+            }
+
+            #animal-role {
+                font-size: 1.8em !important;
+                margin-bottom: 8px !important;
+            }
+
+            #animal-tag {
+                font-size: 0.95em !important;
+            }
+
+            /* 结婚年龄结果页面优化 */
+            #marriage-result-page .result-content h1 {
+                font-size: 1.4em;
+            }
+
+            #marriage-result-card {
+                padding: 30px 20px !important;
+            }
+
+            #marriage-age {
+                font-size: 2.5em !important;
+            }
+
+            #marriage-title {
+                font-size: 1.1em !important;
+            }
+
+            .btn-primary {
+                padding: 12px 30px !important;
+                font-size: 0.95em !important;
+            }
+
+            /* 颜色选择页面手机优化 */
+            .color-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+
+            .color-circle {
+                width: 50%;
+            }
+
+            .color-name {
+                font-size: 0.7em;
+            }
+
+            .color-number {
+                font-size: 0.65em;
+            }
+
+            .color-instruction {
+                font-size: 0.95em;
+                margin-bottom: 20px;
+            }
+
+            .selected-count {
+                font-size: 0.9em;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 欢迎页面 -->
+        <div id="welcome-page" class="page active">
+            <div class="welcome-content">
+                <h1>热门心理测试集合</h1>
+                <p class="subtitle">探索自我，发现潜能，洞察内心世界。</p>
+                
+
+                <div class="tests-grid">
+
+
+                    <!-- 答案之书卡片 -->
+                    <div class="test-card answerbook" id="answerbook-card">
+                        <div class="test-card-header">
+                            <div class="test-icon">📖</div>
+                            <div class="test-card-title-wrapper">
+                                <span class="test-badge">智慧指引</span>
+                                <h3>答案之书</h3>
+                            </div>
+                        </div>
+                        <p>318页生活智慧，随机翻开一页，给你的问题一个答案。</p>
+                        <div class="start-arrow">开始测试</div>
+                    </div>
+                    <!-- 动物城人格测试卡片 -->
+                    <div class="test-card animal" id="animal-card">
+                        <div class="test-card-header">
+                            <div class="test-icon">🦊</div>
+                            <div class="test-card-title-wrapper">
+                                <span class="test-badge">人格测试</span>
+                                <h3>动物城人格测试</h3>
+                            </div>
+                        </div>
+                        <p>发现你的动物城人格！看看你是勇敢的朱迪、聪明的尼克，还是慢悠悠的闪电？</p>
+                        <div class="start-arrow">开始测试</div>
+                    </div>
+                    <!-- 心理年龄测试卡片 -->
+                    <div class="test-card personality" id="personality-card">
+                        <div class="test-card-header">
+                            <div class="test-icon">🧠</div>
+                            <div class="test-card-title-wrapper">
+                                <span class="test-badge">年龄测试</span>
+                                <h3>心理年龄测试</h3>
+                            </div>
+                        </div>
+                        <p>通过15道精心设计的问题，探索你的真实心理年龄，了解你的心智成熟度。</p>
+                        <div class="start-arrow">开始测试</div>
+                    </div>
+
+                    <!-- 结婚年龄预测卡片 -->
+                    <div class="test-card marriage" id="marriage-card">
+                        <div class="test-card-header">
+                            <div class="test-icon">💕</div>
+                            <div class="test-card-title-wrapper">
+                                <span class="test-badge">情感测试</span>
+                                <h3>结婚年龄预测</h3>
+                            </div>
+                        </div>
+                        <p>根据你的性格特质和生活态度，预测最适合你步入婚姻殿堂的年龄段。</p>
+                        <div class="start-arrow">开始测试</div>
+                    </div>
+                    
+                    <!-- 颜色天赋测试卡片 -->
+                    <div class="test-card color" id="color-card">
+                        <div class="test-card-header">
+                            <div class="test-icon">🎨</div>
+                            <div class="test-card-title-wrapper">
+                                <span class="test-badge">天赋测试</span>
+                                <h3>颜色天赋测试</h3>
+                            </div>
+                        </div>
+                        <p>选择最喜欢的两种颜色，发现你隐藏的天赋特质和独特气质。</p>
+                        <div class="start-arrow">开始测试</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试页面 -->
+        <div id="test-page" class="page">
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <div class="question-counter">
+                <span id="current-question">1</span> / <span id="total-questions">15</span>
+            </div>
+
+            <div class="question-container">
+                <h2 id="question-text" class="question-text"></h2>
+                <div id="options-container" class="options-container"></div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button id="prev-btn" class="btn-secondary" disabled>上一题</button>
+                <button id="next-btn" class="btn-primary" disabled>下一题</button>
+            </div>
+
+            <div class="test-restart-container">
+                <button id="test-restart-btn" class="btn-text">重新测试</button>
+            </div>
+        </div>
+
+        <!-- 结果页面 -->
+        <div id="result-page" class="page">
+            <div class="result-content">
+                <h1>测试结果</h1>
+                <div class="result-card">
+                    <div class="mental-age-display">
+                        <p class="label">你的心理年龄是</p>
+                        <p id="mental-age" class="mental-age">25</p>
+                    </div>
+                    <div class="age-comparison">
+                        <p id="age-comparison-text"></p>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <h3>性格分析</h3>
+                    <div id="personality-analysis" class="personality-text"></div>
+                </div>
+
+                <div class="dimensions-card">
+                    <h3>维度分析</h3>
+                    <div id="dimensions-analysis" class="dimensions-list"></div>
+                </div>
+
+                <button id="restart-btn" class="btn-primary">重新测试</button>
+            </div>
+        </div>
+
+        <!-- 结婚年龄预测结果页面 -->
+        <div id="marriage-result-page" class="page">
+            <div class="result-content">
+                <h1>你的预测结婚年龄</h1>
+                <div class="result-card" id="marriage-result-card">
+                    <div class="mental-age-display">
+                        <p id="marriage-age" class="mental-age">26-29</p>
+                        <p class="label">岁</p>
+                    </div>
+                    <div class="age-comparison">
+                        <p id="marriage-title"></p>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <h3>情感分析</h3>
+                    <div id="marriage-analysis" class="personality-text"></div>
+                </div>
+
+                <button id="marriage-restart-btn" class="btn-primary">重新测试</button>
+            </div>
+        </div>
+
+        <!-- 动物城人格测试结果页面 -->
+        <div id="animal-result-page" class="page">
+            <div class="result-content">
+                <h1 style="font-size: 1.8em; margin-bottom: 15px; color: #667eea;">你的动物城人格</h1>
+                <div class="result-card" id="animal-result-card" style="padding: 35px 30px; margin-bottom: 20px; position: relative; overflow: hidden;">
+                    <!-- 装饰性背景元素 -->
+                    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: none;"></div>
+                    <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.08); border-radius: 50%; pointer-events: none;"></div>
+
+                    <div style="position: relative; z-index: 1; text-align: center;">
+                        <!-- 角色emoji图标 -->
+                        <div id="animal-emoji" style="font-size: 5em; margin-bottom: 15px; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">🦊</div>
+
+                        <!-- 角色名称 -->
+                        <p id="animal-role" style="font-size: 2.5em; font-weight: bold; margin: 0 0 10px 0; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">兔子朱迪</p>
+
+                        <!-- 标签 -->
+                        <div style="display: inline-block; background: rgba(255,255,255,0.25); padding: 6px 18px; border-radius: 20px; margin-bottom: 15px;">
+                            <p id="animal-tag" style="font-size: 1.1em; margin: 0; font-weight: 600;"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-card" style="padding: 25px; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.3em; margin-bottom: 15px; color: #667eea;">性格解析</h3>
+                    <div id="animal-analysis" class="personality-text" style="font-size: 0.95em; line-height: 1.7; color: #555;"></div>
+                </div>
+
+                <button id="animal-restart-btn" class="btn-primary" style="padding: 12px 35px; font-size: 1em;">重新测试</button>
+            </div>
+        </div>
+
+        <!-- 颜色选择页面 -->
+        <div id="color-selection-page" class="page">
+            <div class="color-selection-page">
+                <h1 style="font-size: 1.8em; margin-bottom: 15px; color: #667eea;">选择你最喜欢的两种颜色</h1>
+                <p class="color-instruction">看你隐藏的天赋</p>
+
+                <div class="selected-count" id="selected-count">已选择：0/2</div>
+
+                <div class="color-grid" id="color-grid">
+                    <!-- 颜色选项将由JavaScript动态生成 -->
+                </div>
+
+                <button id="color-submit-btn" class="btn-primary" disabled style="margin-top: 20px;">查看结果</button>
+
+                <div class="test-restart-container">
+                    <button id="color-restart-btn" class="btn-text">重新选择</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 颜色天赋结果页面 -->
+        <div id="color-result-page" class="page">
+            <div class="result-content">
+                <h1 style="font-size: 1.8em; margin-bottom: 15px; color: #667eea;">你的天赋特质</h1>
+
+                <div class="result-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 35px 30px; margin-bottom: 20px;">
+                    <div style="text-align: center; color: white;">
+                        <p style="font-size: 1.2em; margin-bottom: 15px;" id="color-combo-title"></p>
+                        <p style="font-size: 2em; font-weight: bold; margin: 0;" id="color-talent-title"></p>
+                    </div>
+                </div>
+
+                <div class="analysis-card" style="padding: 25px; margin-bottom: 15px;">
+                    <h3 style="font-size: 1.3em; margin-bottom: 15px; color: #667eea;">第一种颜色</h3>
+                    <div id="color-first-analysis" style="font-size: 0.95em; line-height: 1.7; color: #555;"></div>
+                </div>
+
+                <div class="analysis-card" style="padding: 25px; margin-bottom: 15px;">
+                    <h3 style="font-size: 1.3em; margin-bottom: 15px; color: #667eea;">第二种颜色</h3>
+                    <div id="color-second-analysis" style="font-size: 0.95em; line-height: 1.7; color: #555;"></div>
+                </div>
+
+                <div class="analysis-card" style="padding: 25px; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.3em; margin-bottom: 15px; color: #667eea;">组合天赋</h3>
+                    <div id="color-combo-analysis" style="font-size: 0.95em; line-height: 1.7; color: #555;"></div>
+                </div>
+
+                <button id="color-result-restart-btn" class="btn-primary" style="padding: 12px 35px; font-size: 1em;">重新测试</button>
+            </div>
+        </div>
+
+        <!-- 答案之书结果页面 -->
+        <div id="answerbook-result-page" class="page">
+            <div class="result-content">
+                <h1 style="font-size: 1.8em; margin-bottom: 15px; color: #d4880f;">答案之书</h1>
+
+                <div class="result-card" style="background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); padding: 40px 30px; margin-bottom: 20px;">
+                    <div style="text-align: center; color: white;">
+                        <p style="font-size: 1.3em; margin-bottom: 15px; opacity: 0.9;">第 <span id="answer-page-number"></span> 页</p>
+                        <p style="font-size: 2em; font-weight: bold; margin: 0; line-height: 1.5; text-shadow: 0 2px 4px rgba(0,0,0,0.2);" id="answer-text"></p>
+                    </div>
+                </div>
+
+                <div class="analysis-card" style="padding: 25px; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.3em; margin-bottom: 15px; color: #d4880f; text-align: center;">📖 关于答案之书</h3>
+                    <div style="font-size: 0.95em; line-height: 1.7; color: #555; text-align: justify;">
+                        答案之书源自古老的智慧传承，当你心中有疑问时，静下心来，随机翻开一页，或许就能找到当下最需要的启示。这不是迷信，而是一种与内心对话的方式。每一个答案都可能成为你思考的起点。
+                    </div>
+                </div>
+
+                <button id="answerbook-restart-btn" class="btn-primary" style="padding: 12px 35px; font-size: 1em;">再翻一页</button>
+            </div>
+        </div>
+
+        <!-- 答案之书使用说明页面 -->
+        <div id="answerbook-guide-page" class="page">
+            <div class="result-content" style="text-align: center;">
+                <h1 style="font-size: 2em; margin-bottom: 20px; color: #d4880f;">使用方法</h1>
+
+                <div style="font-size: 8em; margin: 30px 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));">?</div>
+
+                <div class="analysis-card" style="padding: 30px; margin-bottom: 25px; text-align: left;">
+                    <div style="font-size: 1.05em; line-height: 2; color: #555;">
+                        <p style="margin-bottom: 20px;">1、默想你心中的问题，尽量是简单的问答句式。例如"这条路如何走下去？""我这次能成功吗？""我应该相信这本书吗？"</p>
+                        <p style="margin-bottom: 20px;">2、闭上眼睛，默想问题三遍。</p>
+                        <p style="margin-bottom: 0;">3、深呼吸，然后点击"查看答案"。</p>
+                    </div>
+                </div>
+
+                <button id="show-answer-btn" class="btn-primary" style="padding: 15px 45px; font-size: 1.1em; margin-bottom: 15px;">查看答案</button>
+
+                <div style="margin-top: 20px;">
+                    <button id="guide-back-btn" class="btn-text" style="padding: 10px 25px;">返回首页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 授权码验证对话框 -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content auth-modal">
+            <h3>授权验证</h3>
+            <p class="auth-description">请输入授权码以开始测试</p>
+
+            <div class="input-group">
+                <label for="auth-code-input">授权码：</label>
+                <input type="text" id="auth-code-input" placeholder="请输入6位授权码" maxlength="6">
+            </div>
+
+            <div id="auth-error" class="auth-error"></div>
+
+            <div class="modal-buttons">
+                <button id="auth-cancel" class="btn-secondary">取消</button>
+                <button id="auth-verify" class="btn-primary">验证</button>
+            </div>
+
+            <div class="auth-loading" id="auth-loading">
+                <div class="spinner"></div>
+                <p>验证中...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重新测试确认对话框 -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3>确认重新测试</h3>
+            <p>确定要重新开始测试吗？<br>当前的答题进度将会丢失。</p>
+            <div class="modal-buttons">
+                <button id="confirm-cancel" class="btn-secondary">取消</button>
+                <button id="confirm-ok" class="btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 环境配置 ====================
+        const ENV_CONFIG = {
+            development: {
+                name: '开发环境',
+                apiUrl: 'http://127.0.0.1:3000/api'
+            },
+            production: {
+                name: '线上环境',
+                apiUrl: 'http://36.137.158.212:3000/api'
+            }
+        };
+
+        // 当前环境 - 在这里修改环境：'development' 或 'production'
+        let currentEnvironment = 'production';
+
+        function getEnvConfig() {
+            return ENV_CONFIG[currentEnvironment];
+        }
+
+        console.log(`🚀 当前环境：${getEnvConfig().name}`);
+        console.log(`📡 API地址：${getEnvConfig().apiUrl}`);
+
+        // ==================== 答案之书数据 ====================
+        const answerBookData = [
+            "别失望", "你值得拥有最好的", "要有信心", "好运即将来临", "现在不要放弃",
+            "等待合适的时机", "相信自己的直觉", "保持耐心", "是时候改变了", "勇敢前进",
+            "听从内心的声音", "一切都会好起来", "不要犹豫", "机会正在靠近", "保持积极的态度",
+            "相信命运的安排", "你已经知道答案", "跟随你的梦想", "不要急于求成", "坚持下去",
+            "相信过程", "放下过去", "拥抱未来", "给自己一些时间", "答案就在你心中",
+            "是的,现在就做", "不,还不是时候", "也许吧", "当然可以", "绝对不行",
+            "重新考虑一下", "现在行动", "保持观望", "全力以赴", "顺其自然",
+            "寻求他人建议", "相信第一感觉", "再等等看", "把握当下", "让时间来证明",
+            "勇敢尝试", "谨慎行事", "放手一搏", "三思而后行", "随心所欲",
+            "计划周详", "即兴发挥", "遵循规则", "打破常规", "循序渐进",
+            "大胆创新", "保守一点", "冒险一次", "稳扎稳打", "快速行动",
+            "慢慢来", "一鼓作气", "分步实施", "全面考虑", "抓住重点",
+            "着眼全局", "关注细节", "相信直觉", "理性分析", "感性一点",
+            "别想太多", "深思熟虑", "简单点好", "复杂一些", "轻松面对",
+            "认真对待", "开心就好", "慎重选择", "随便都行", "必须这样",
+            "换个角度", "坚持己见", "听听别人", "相信自己", "求助他人",
+            "独立完成", "团队合作", "单打独斗", "寻求支持", "自己做主",
+            "征求意见", "果断决定", "多方权衡", "立即行动", "暂缓执行",
+            "现在就去", "再想一想", "不要迟疑", "保持冷静", "激情满怀",
+            "理智一些", "凭感觉走", "按计划来", "灵活应对", "坚守原则",
+            "常常是最后一把钥匙打开了神殿门", "困难的道路经常通往高处", "风雨之后见彩虹", "黎明前的黑暗最深", "守得云开见月明",
+            "机会留给有准备的人", "成功需要耐心等待", "时机成熟自然来", "急于求成反而误事", "慢工出细活",
+            "欲速则不达", "好事多磨", "塞翁失马焉知非福", "否极泰来", "柳暗花明又一村",
+            "山重水复疑无路", "春暖花开", "冬天来了春天还会远吗", "不破不立", "旧的不去新的不来",
+            "放下才能重新开始", "转角遇到爱", "命运自有安排", "顺其自然最好", "强扭的瓜不甜",
+            "该来的总会来", "该走的留不住", "缘分天注定", "一切都是最好的安排", "相信时间会给出答案",
+            "当下最重要", "过去已成历史", "未来充满可能", "活在当下", "珍惜眼前人",
+            "把握现在", "别让未来等太久", "不要让过去拖累你", "向前看", "回头看看",
+            "总结经验", "吸取教训", "记住这一刻", "忘掉烦恼", "放下包袱",
+            "轻装上阵", "做好准备", "未雨绸缪", "临阵磨枪", "有备无患",
+            "船到桥头自然直", "车到山前必有路", "办法总比困难多", "没有过不去的坎", "雨过天晴",
+            "拨云见日", "守株待兔不可取", "主动出击", "坐等不如行动", "说干就干",
+            "立即执行", "马上开始", "刻不容缓", "时不我待", "只争朝夕",
+            "稳住别慌", "淡定从容", "胸有成竹", "有条不紊", "按部就班",
+            "循规蹈矩", "打破常规", "另辟蹊径", "走自己的路", "不走寻常路",
+            "标新立异", "与众不同", "随大流", "入乡随俗", "求同存异",
+            "保持特色", "展现个性", "适度妥协", "坚持原则", "灵活变通",
+            "以不变应万变", "随机应变", "看情况而定", "具体问题具体分析", "对症下药",
+            "因地制宜", "因时制宜", "因人而异", "一视同仁", "公平对待",
+            "特殊情况特殊处理", "常规操作", "按流程走", "简化程序", "严格要求",
+            "宽容待人", "严于律己宽以待人", "己所不欲勿施于人", "推己及人", "换位思考",
+            "将心比心", "设身处地", "体谅他人", "理解万岁", "多一份包容",
+            "少一些计较", "糊涂是福", "难得糊涂", "心明眼亮", "明察秋毫",
+            "洞察先机", "防患未然", "临危不乱", "泰山崩于前而色不变", "宠辱不惊",
+            "波澜不惊", "心如止水", "激情澎湃", "热血沸腾", "斗志昂扬",
+            "意气风发", "精神抖擞", "神采奕奕", "容光焕发", "朝气蓬勃",
+            "青春洋溢", "活力四射", "充满希望", "前程似锦", "锦绣前程",
+            "大展宏图", "鹏程万里", "前途光明", "一片光明", "光明在望",
+            "曙光初现", "露出曙光", "看到希望", "希望就在前方", "胜利在望",
+            "成功不远", "唾手可得", "近在咫尺", "触手可及", "指日可待",
+            "为期不远", "来日方长", "日久见人心", "路遥知马力", "时间是最好的证明",
+            "实践是检验真理的唯一标准", "事实胜于雄辩", "眼见为实", "耳听为虚", "百闻不如一见",
+            "亲自去看", "亲身体验", "实地考察", "调查研究", "深入了解",
+            "全面掌握", "抓住关键", "找准重点", "突破难点", "克服困难",
+            "迎难而上", "知难而进", "迎接挑战", "勇往直前", "披荆斩棘",
+            "乘风破浪", "扬帆起航", "一帆风顺", "顺风顺水", "如鱼得水",
+            "得心应手", "运用自如", "游刃有余", "轻车熟路", "驾轻就熟",
+            "熟能生巧", "勤能补拙", "笨鸟先飞", "天道酬勤", "一分耕耘一分收获",
+            "种瓜得瓜种豆得豆", "因果循环", "善有善报", "好人有好报", "付出总有回报",
+            "努力不会白费", "汗水不会骗人", "真诚换真情", "用心被看见", "诚意能感动",
+            "真心能打动", "感人至深", "情真意切", "发自内心", "真情流露",
+            "自然而然", "水到渠成", "瓜熟蒂落", "功到自然成", "积累到一定程度",
+            "量变引起质变", "厚积薄发", "积少成多", "聚沙成塔", "集腋成裘",
+            "滴水穿石", "铁杵磨成针", "只要功夫深", "世上无难事只怕有心人", "有志者事竟成",
+            "精诚所至金石为开", "心想事成", "梦想成真", "愿望实现", "如愿以偿",
+            "称心如意", "尽如人意", "正合心意", "合乎心意", "遂心如意",
+            "天从人愿", "如你所愿", "恰如其分", "恰到好处", "不多不少",
+            "刚刚好", "正合适", "天时地利人和", "万事俱备", "只欠东风",
+            "一切就绪", "蓄势待发", "箭在弦上", "一触即发", "千钧一发",
+            "关键时刻", "紧要关头", "重要时刻", "决定性时刻", "转折点",
+            "分水岭", "里程碑", "新起点", "新开始", "崭新篇章",
+            "翻开新的一页", "迈向新阶段", "进入新时代", "开启新征程", "踏上新旅程",
+            "展望新未来", "憧憬美好", "期待明天", "拥抱变化", "迎接新生",
+            "焕然一新", "旧貌换新颜", "改头换面", "脱胎换骨", "浴火重生",
+            "凤凰涅槃", "重获新生", "东山再起", "卷土重来", "再展雄风",
+            "再创辉煌", "再铸辉煌", "再续辉煌", "继往开来", "承前启后",
+            "继承发展", "推陈出新", "革故鼎新", "除旧布新", "吐故纳新",
+            "新陈代谢", "生生不息", "源远流长", "绵延不绝", "长盛不衰",
+            "历久弥新", "永葆青春", "青春永驻", "容颜不老", "芳华永驻",
+            "风华正茂", "年富力强", "正当年", "黄金时期", "大好时光",
+            "美好年华", "似水年华", "岁月如歌", "时光荏苒", "光阴似箭",
+            "日月如梭", "白驹过隙", "转瞬即逝", "稍纵即逝", "弹指之间",
+            "须臾之间", "刹那之间", "顷刻之间", "一瞬间", "一眨眼",
+            "一转眼", "恍然之间", "不知不觉", "悄然而至", "不期而至",
+            "意外之喜", "惊喜连连", "喜出望外", "喜从天降", "好事成双",
+            "双喜临门", "福星高照", "吉星高照", "鸿运当头", "时来运转"
+        ];
+
+        // ==================== 动物城人格测试题目数据 ====================
+        const animalQuestions = [
+            {id:1, q:"公交车到站了，但车厢里挤得像沙丁鱼罐头，下一班车要等15分钟，你愿意等吗？", yes:2, no:4},
+            {id:2, q:"出门游玩时突然头疼欲裂，这时有位陌生好心人递来止痛药，你敢吃吗？", yes:6, no:3},
+            {id:3, q:"遇到催泪弹级别的感人故事或电影，你的第一反应是？", yes:12, no:7},
+            {id:4, q:"一辆神秘的红色面包车停在湖边，你猜里面坐的是什么人？", yes:3, no:5},
+            {id:5, q:"看到纸上画着的一颗桃心，你脑海里第一个跳出来的是什么？", yes:12, no:8},
+            {id:6, q:"朋友兴冲冲地说要去参加聚会，你会心动想一起去吗？", yes:9, no:10},
+            {id:7, q:"和男生吃了顿价格不菲的饭，他坚持抢着买单，你会怎么做？", yes:10, no:12},
+            {id:8, q:"同学聚会热火朝天，但你最铁的好友缺席了，你的反应是？", yes:13, no:12},
+            {id:9, q:"如果问你打算几岁步入婚姻殿堂，你心里有数吗？", yes:11, no:10},
+            {id:10, q:"宅家的周末，手机和座机突然同时响起铃声，你会？", yes:15, no:16},
+            {id:11, q:"给你一次选择梦想居住地的机会，你会选哪里？", yes:14, no:15},
+            {id:12, q:"地铁里人挤人，一个打扮精致的女生被人踩了一脚，你觉得她会？", yes:16, no:17},
+            {id:13, q:"多年不见也没联系的老朋友突然找你，你的第一感觉是？", yes:21, no:17},
+            {id:14, q:"生日收到朋友精心准备的礼物，但你并不太喜欢，你会？", yes:18, no:19},
+            {id:15, q:"商场大促销，满场都是红色折扣标签，你会？", yes:18, no:19},
+            {id:16, q:"朋友送你的东西，你会转手送给其他人吗？", yes:19, no:20},
+            {id:17, q:"路边有位气质撩人的女子招手拦出租车，你直觉认为她要去？", yes:16, no:21},
+            {id:18, q:"背后突然被人重重拍了下肩膀，你本能觉得这人是男生还是女生？", yes:22, no:23},
+            {id:19, q:"便利店冰柜前，冰红茶和珍珠奶茶你更想拿哪个？", yes:18, no:20},
+            {id:20, q:"公交车上偶遇好朋友，你会主动帮TA刷卡买票吗？", yes:24, no:21},
+            {id:21, q:"高冷气质的异性，对你有吸引力吗？", yes:25, no:23},
+            {id:22, q:"街上有对情侣勾肩搭背走过，你本能觉得他们是什么关系？", yes:"A", no:"B"},
+            {id:23, q:"小时候玩过家家游戏，你更喜欢当妈妈还是当小孩？", yes:"E", no:"C"},
+            {id:24, q:"游乐园里有两种项目任你选，你更倾向哪种？", yes:"F", no:"D"},
+            {id:25, q:"和朋友相处时，你们总能聊到天荒地老吗？", yes:"G", no:24}
+        ];
+
+        const animalResults = {
+            "A": {
+                role: "Mr.Big",
+                emoji: "🐭",
+                color: ["#08203b","#6a1b32"],
+                tag: "教父型",
+                description: "你是天生的领导者，拥有强大的气场和决策力。表面冷静沉稳，但内心充满智慧和战略思维。你懂得权衡利弊，做事果断干练，是团队中不可或缺的主心骨。"
+            },
+            "B": {
+                role: "猎豹警官",
+                emoji: "🐆",
+                color: ["#ff6b35","#ffd166"],
+                tag: "少女心猎豹",
+                description: "外表高冷酷飒，内心却藏着一颗少女心。你行动力超强，做事雷厉风行，但偶尔也会展现出可爱的一面。这种反差萌让你更加迷人！"
+            },
+            "C": {
+                role: "夏奇羊",
+                emoji: "🐏",
+                color: ["#ffd700","#ff084a"],
+                tag: "C位大明星",
+                description: "你天生就是舞台的焦点，充满自信和表现力。热爱被关注，享受掌声和赞美。你的热情感染力极强，总能带动身边的氛围，是人群中最闪耀的那颗星。"
+            },
+            "D": {
+                role: "牛局长",
+                emoji: "🐃",
+                color: ["#333333","#c8f169"],
+                tag: "原则至上",
+                description: "你是原则性极强的人，做事一板一眼，严格遵守规则。表面看似严肃古板，实则内心坚定可靠。你的认真负责让人信赖，是值得托付重任的好伙伴。"
+            },
+            "E": {
+                role: "狐狸尼克",
+                emoji: "🦊",
+                color: ["#4ecdc4","#f7b731"],
+                tag: "嘴硬心软",
+                description: "你说话毒舌，行为痞气，但内心其实超级温柔。擅长用幽默和调侃掩饰真实情感，对待朋友却格外仗义。这种外刚内柔的性格让你魅力十足。"
+            },
+            "F": {
+                role: "闪电树懒",
+                emoji: "🦥",
+                color: ["#a8dadc","#457b9d"],
+                tag: "慢节奏智者",
+                description: "你喜欢慢生活，不急不躁，按照自己的节奏前进。虽然行动缓慢，但思考深刻，做事稳扎稳打。你的从容淡定是这个快节奏时代的一股清流。"
+            },
+            "G": {
+                role: "兔子朱迪",
+                emoji: "🐰",
+                color: ["#ff9a00","#ffea00"],
+                tag: "追梦行动派",
+                description: "你充满热情和梦想，永远积极向上。遇到困难从不轻易放弃，总是勇敢地迎接挑战。你的正能量和坚持不懈的精神，激励着身边的每一个人。"
+            }
+        };
+
+        // ==================== 颜色天赋测试数据 ====================
+        const colors = [
+            { id: 1, name: "红色", code: "#E63946", gradient: "linear-gradient(135deg, #E63946 0%, #F1FAEE 100%)" },
+            { id: 2, name: "橙色", code: "#F4A261", gradient: "linear-gradient(135deg, #F4A261 0%, #FFF3E0 100%)" },
+            { id: 3, name: "粉色", code: "#FFB6C1", gradient: "linear-gradient(135deg, #FFB6C1 0%, #FFF0F5 100%)" },
+            { id: 4, name: "玫红色", code: "#FF1493", gradient: "linear-gradient(135deg, #FF1493 0%, #FFE4E1 100%)" },
+            { id: 5, name: "暗红色", code: "#8B0000", gradient: "linear-gradient(135deg, #8B0000 0%, #FFE4E1 100%)" },
+            { id: 6, name: "淡紫色", code: "#DDA0DD", gradient: "linear-gradient(135deg, #DDA0DD 0%, #F8F0FF 100%)" },
+            { id: 7, name: "紫色", code: "#8B008B", gradient: "linear-gradient(135deg, #8B008B 0%, #F0E6FF 100%)" },
+            { id: 8, name: "黄色", code: "#FFD700", gradient: "linear-gradient(135deg, #FFD700 0%, #FFFACD 100%)" },
+            { id: 9, name: "浅蓝色", code: "#87CEEB", gradient: "linear-gradient(135deg, #87CEEB 0%, #F0F8FF 100%)" },
+            { id: 10, name: "深蓝色", code: "#00008B", gradient: "linear-gradient(135deg, #00008B 0%, #E6F3FF 100%)" },
+            { id: 11, name: "绿色", code: "#32CD32", gradient: "linear-gradient(135deg, #32CD32 0%, #F0FFF0 100%)" },
+            { id: 12, name: "青色", code: "#00CED1", gradient: "linear-gradient(135deg, #00CED1 0%, #E0FFFF 100%)" },
+            { id: 13, name: "棕色", code: "#8B4513", gradient: "linear-gradient(135deg, #8B4513 0%, #FFF8DC 100%)" },
+            { id: 14, name: "白色", code: "#FFFFFF", gradient: "linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%)" },
+            { id: 15, name: "黑色", code: "#000000", gradient: "linear-gradient(135deg, #000000 0%, #808080 100%)" },
+            { id: 16, name: "墨绿色", code: "#2F4F4F", gradient: "linear-gradient(135deg, #2F4F4F 0%, #E8F5E9 100%)" }
+        ];
+
+        const colorTalents = {
+            3: { name: "粉色", trait: "温柔共情者+浪漫氛围营造者", desc: "像软乎乎的棉花糖，自带甜美的亲和力，能敏锐捕捉他人的情绪需求，用温柔的互动拉近距离，还能在场景中注入浪漫感，是场域里的暖心氛围师。" },
+            14: { name: "白色", trait: "包容协调者+简洁梳理者", desc: "像干净的画布，自带包容的气场，能兼容不同观点、化解冲突，同时擅长把复杂信息梳理得简洁清晰，是场域里的调和梳理者。" },
+            9: { name: "浅蓝色", trait: "清爽的松弛氛围师", desc: "像刚被风吹散云朵的晴空，自带通透舒爽感，能为场景注入不紧绷的松弛气息，是场域里的舒适基底。" },
+            11: { name: "绿色", trait: "鲜活的自然调和者", desc: "像沾着晨露的嫩草叶，自带生机治愈感，能呼应浅蓝的清爽、添上自然灵动的层次，是场域里的活力催化剂。" },
+            1: { name: "红色", trait: "热情引领者+活力注入者", desc: "像燃烧的火焰，自带强大的感染力和行动力，能点燃他人的热情、激发团队的活力，是场域里的能量核心。" },
+            8: { name: "黄色", trait: "乐观活力派+温暖照耀者", desc: "像初升的太阳，自带明亮温暖的气质，能带给他人积极正向的情绪，让环境充满希望和活力，是场域里的阳光使者。" },
+            10: { name: "深蓝色", trait: "沉稳智慧者+深度思考者", desc: "像深邃的海洋，自带冷静理性的气场，能深入分析问题本质、提供有深度的见解，是场域里的智慧支柱。" },
+            15: { name: "黑色", trait: "神秘力量者+高级质感营造者", desc: "像夜空的深邃，自带强大的气场和高级感，能营造出独特的氛围和质感，是场域里的气场掌控者。" },
+            4: { name: "玫红色", trait: "热烈表达者+激情催化剂", desc: "像盛开的玫瑰，自带浓烈的情感表达力，能让场景充满激情和生命力，是场域里的情感放大器。" },
+            7: { name: "紫色", trait: "神秘优雅者+艺术灵感源", desc: "像皇室的气质，自带优雅和神秘感，能激发创造力和艺术灵感，是场域里的灵感缪斯。" },
+            2: { name: "橙色", trait: "活力社交家+创意激发者", desc: "像秋天的果实，自带温暖活泼的社交能量，能激发创意和活跃氛围，是场域里的社交润滑剂。" },
+            12: { name: "青色", trait: "清新沟通者+平衡协调者", desc: "像清澈的湖水，自带清爽的沟通力，能平衡不同声音、促进理解，是场域里的沟通桥梁。" },
+            6: { name: "淡紫色", trait: "温柔梦想家+浪漫诗人", desc: "像薰衣草田，自带柔和梦幻的气质，能营造诗意浪漫的氛围，是场域里的浪漫编织者。" },
+            13: { name: "棕色", trait: "踏实可靠者+温暖守护者", desc: "像大地的拥抱，自带稳重可靠的气质，能给人安全感和温暖的支持，是场域里的安全港湾。" },
+            5: { name: "暗红色", trait: "深沉力量者+坚定意志者", desc: "像陈年的红酒，自带深沉的力量感，能在关键时刻展现坚定的意志和决心，是场域里的坚实后盾。" },
+            16: { name: "墨绿色", trait: "沉稳智者+自然疗愈者", desc: "像古老的森林，自带沉稳的智慧和疗愈力，能带来内心的平静和力量，是场域里的心灵绿洲。" }
+        };
+
+        const colorCombos = {
+            // 原有组合
+            "3-14": { title: "温柔共情+包容梳理", desc: "既靠粉色的亲和力拉近距离、传递温暖，又凭白色的包容力协调分歧、简化事务，适配需要温馨氛围且涉及多观点协作的场景（如暖心主题聚会、轻量情感类协作），能让相处有温度也让事务更顺畅。" },
+            "9-11": { title: "清爽松弛+自然治愈", desc: "既靠浅蓝色稳住舒展的氛围基调，又凭绿色让场景更显鲜活不单调，适配需要清新治愈的场景（如森系户外野餐、春日绿植茶会），能让人沉浸在像坐在湖边草坪上吹风般的舒爽体验里。" },
+            "1-8": { title: "热情活力+乐观温暖", desc: "既有红色的强大能量和行动力，又有黄色的明亮温暖和积极性，适配需要高能量和正向氛围的场景（如团建活动、激励大会），能让参与者充满干劲和希望。" },
+            "10-15": { title: "沉稳智慧+神秘力量", desc: "既有深蓝的理性深度，又有黑色的强大气场，适配需要专业严肃氛围的场景（如高端商务会议、策略研讨），能营造出权威而深邃的场域感。" },
+            "4-7": { title: "热烈激情+神秘优雅", desc: "既有玫红的浓烈情感，又有紫色的优雅神秘，适配需要艺术感和情感张力的场景（如艺术展览、浪漫晚宴），能创造出独特而难忘的体验。" },
+            "2-12": { title: "活力社交+清新沟通", desc: "既有橙色的社交能量，又有青色的清爽沟通力，适配需要轻松交流的社交场景（如创意工作坊、轻松聚会），能让互动既热络又顺畅。" },
+            "3-6": { title: "温柔梦想+浪漫共情", desc: "既有淡紫的梦幻浪漫，又有粉色的温柔共情，适配需要柔美氛围的场景（如婚礼策划、闺蜜下午茶），能营造出极致温柔浪漫的氛围。" },
+            "13-16": { title: "踏实可靠+沉稳疗愈", desc: "既有棕色的稳重可靠，又有墨绿的沉稳疗愈力，适配需要安全感和内心平静的场景（如疗愈工作坊、静心茶会），能让人感受到深沉的支持和宁静。" },
+            "1-4": { title: "热情引领+激情催化", desc: "双倍的热烈能量，既有红色的行动力又有玫红的情感张力，适配需要高度激情的场景（如音乐节、热血竞赛），能将氛围推向沸点。" },
+            "9-12": { title: "清爽松弛+清新沟通", desc: "双重清爽感，既有浅蓝的松弛又有青色的流畅沟通，适配需要轻松愉快交流的场景（如海边聚会、清新读书会），能让互动既舒适又高效。" },
+
+            // 红色系列（1号）
+            "1-2": { title: "热情引领+活力社交", desc: "既有红色的强大感染力和行动力，又有橙色的温暖社交能量，适配需要高能量和热情互动的场景（如年会庆典、派对狂欢），能让现场气氛迅速升温、人人参与。" },
+            "1-3": { title: "热情引领+温柔共情", desc: "既有红色的强大能量，又有粉色的温柔亲和，适配需要既有力量又有温度的场景（如励志演讲、暖心公益），能在激励人心的同时传递关怀。" },
+            "1-5": { title: "热情引领+深沉力量", desc: "双重力量感，既有红色的热烈行动力又有暗红的坚定意志，适配需要强大气场和执行力的场景（如重大项目启动、挑战性任务），能凝聚团队坚定前行。" },
+            "1-6": { title: "热情引领+温柔梦想", desc: "既有红色的行动力，又有淡紫的梦幻柔和，适配需要激情又不失浪漫的场景（如创意发布会、梦想分享会），能让激情与柔美完美融合。" },
+            "1-7": { title: "热情引领+神秘优雅", desc: "既有红色的热烈能量，又有紫色的高贵神秘，适配需要气场与热情并存的场景（如高端品牌发布、艺术首映），能营造出独特的贵气氛围。" },
+            "1-9": { title: "热情引领+清爽松弛", desc: "既有红色的强大能量，又有浅蓝的松弛舒爽，适配需要活力但不紧张的场景（如户外运动日、轻松竞技），能让人在热情参与中保持轻松状态。" },
+            "1-10": { title: "热情引领+沉稳智慧", desc: "既有红色的行动力，又有深蓝的理性冷静，适配需要既有激情又有策略的场景（如战略部署会、竞技比赛），能在热血中保持清醒。" },
+            "1-11": { title: "热情引领+自然治愈", desc: "既有红色的强大能量，又有绿色的自然生机，适配需要活力与自然结合的场景（如生态运动会、户外挑战），能让激情在自然中绽放。" },
+            "1-12": { title: "热情引领+清新沟通", desc: "既有红色的感染力，又有青色的清爽沟通力，适配需要高效互动的场景（如头脑风暴、创意马拉松），能让交流既热烈又顺畅。" },
+            "1-13": { title: "热情引领+踏实可靠", desc: "既有红色的行动力，又有棕色的稳重踏实，适配需要激情与稳定并存的场景（如企业文化建设、团队凝聚），能让激情落地生根。" },
+            "1-14": { title: "热情引领+包容协调", desc: "既有红色的强大感染力，又有白色的包容协调力，适配需要激发活力又兼顾各方的场景（如多元团队建设、全员动员会），能让每个人都被点燃。" },
+            "1-15": { title: "热情引领+神秘力量", desc: "既有红色的热烈能量，又有黑色的强大气场，适配需要极强感染力的场景（如重磅发布会、震撼表演），能营造出令人难忘的强大氛围。" },
+            "1-16": { title: "热情引领+沉稳疗愈", desc: "既有红色的行动力，又有墨绿的深沉稳定，适配需要激情但有底蕴的场景（如传统文化创新、经典再现），能让激情更显厚重。" },
+
+            // 橙色系列（2号）
+            "2-3": { title: "活力社交+温柔共情", desc: "既有橙色的温暖活泼，又有粉色的亲和共情，适配需要轻松温馨社交的场景（如亲子活动、社区聚会），能让互动既热络又贴心。" },
+            "2-4": { title: "活力社交+热烈激情", desc: "既有橙色的社交能量，又有玫红的激情表达，适配需要热情洋溢的场景（如主题派对、庆祝活动），能让氛围既欢乐又充满感染力。" },
+            "2-5": { title: "活力社交+深沉力量", desc: "既有橙色的温暖活力，又有暗红的坚定意志，适配需要温暖有力的场景（如温馨动员会、关怀式激励），能在轻松中传递力量。" },
+            "2-6": { title: "活力社交+温柔梦想", desc: "既有橙色的活泼能量，又有淡紫的梦幻浪漫，适配需要温馨梦幻的场景（如主题派对、浪漫聚会），能营造出温暖又梦幻的氛围。" },
+            "2-7": { title: "活力社交+神秘优雅", desc: "既有橙色的社交热情，又有紫色的优雅气质，适配需要活跃又有品位的场景（如艺术沙龙、雅集聚会），能让互动既热络又有格调。" },
+            "2-8": { title: "活力社交+乐观温暖", desc: "双重温暖能量，既有橙色的社交活力又有黄色的明亮乐观，适配需要欢乐氛围的场景（如儿童活动、欢庆聚会），能让现场充满阳光般的快乐。" },
+            "2-9": { title: "活力社交+清爽松弛", desc: "既有橙色的温暖活力，又有浅蓝的清爽松弛，适配需要轻松愉快的场景（如海边烧烤、度假聚会），能让互动既活跃又舒适。" },
+            "2-10": { title: "活力社交+沉稳智慧", desc: "既有橙色的社交热情，又有深蓝的理性深度，适配需要社交与思考并存的场景（如学术交流会、智慧分享会），能让交流既热络又有深度。" },
+            "2-11": { title: "活力社交+自然治愈", desc: "既有橙色的温暖活力，又有绿色的自然清新，适配需要温馨自然的场景（如田园聚会、生态活动），能让互动充满自然的温暖。" },
+            "2-13": { title: "活力社交+踏实可靠", desc: "既有橙色的社交能量，又有棕色的稳重踏实，适配需要温暖可靠的场景（如家庭聚会、邻里活动），能营造出温馨踏实的氛围。" },
+            "2-14": { title: "活力社交+包容协调", desc: "既有橙色的温暖活力，又有白色的包容协调，适配需要温馨和谐的场景（如多元文化交流、包容性聚会），能让每个人都感受到温暖和接纳。" },
+            "2-15": { title: "活力社交+神秘力量", desc: "既有橙色的温暖社交，又有黑色的强大气场，适配需要温暖又有分量的场景（如高端社交晚宴、品牌私享会），能营造出温暖而高级的氛围。" },
+            "2-16": { title: "活力社交+沉稳疗愈", desc: "既有橙色的温暖活力，又有墨绿的沉稳疗愈，适配需要温馨安定的场景（如疗愈沙龙、心灵聚会），能让互动既温暖又有深度。" },
+
+            // 粉色系列（3号）
+            "3-4": { title: "温柔共情+热烈激情", desc: "既有粉色的温柔亲和，又有玫红的热烈激情，适配需要柔情与热情并存的场景（如浪漫告白、情感表达会），能让温柔中迸发出激情。" },
+            "3-5": { title: "温柔共情+深沉力量", desc: "既有粉色的温柔共情，又有暗红的坚定意志，适配需要温柔但有力量的场景（如温情激励、关怀支持会），能用温柔传递坚定的力量。" },
+            "3-7": { title: "温柔共情+神秘优雅", desc: "既有粉色的温柔亲和，又有紫色的优雅神秘，适配需要柔美高雅的场景（如优雅下午茶、艺术鉴赏会），能营造出精致温柔的氛围。" },
+            "3-8": { title: "温柔共情+乐观温暖", desc: "双重温暖能量，既有粉色的温柔共情又有黄色的明亮乐观，适配需要温馨阳光的场景（如母婴活动、温馨聚会），能营造出最温暖的氛围。" },
+            "3-9": { title: "温柔共情+清爽松弛", desc: "既有粉色的温柔亲和，又有浅蓝的清爽松弛，适配需要柔和舒适的场景（如闺蜜聚会、轻松茶会），能让相处既温柔又舒适。" },
+            "3-10": { title: "温柔共情+沉稳智慧", desc: "既有粉色的温柔共情，又有深蓝的理性智慧，适配需要温柔但有深度的场景（如心理咨询、情感疗愈），能用温柔包裹理性的支持。" },
+            "3-11": { title: "温柔共情+自然治愈", desc: "既有粉色的温柔亲和，又有绿色的自然治愈，适配需要温柔疗愈的场景（如自然疗愈、花艺工坊），能营造出最治愈的温柔氛围。" },
+            "3-12": { title: "温柔共情+清新沟通", desc: "既有粉色的温柔共情，又有青色的清爽沟通，适配需要温柔顺畅交流的场景（如情感分享会、温馨座谈），能让沟通既温柔又高效。" },
+            "3-13": { title: "温柔共情+踏实可靠", desc: "既有粉色的温柔共情，又有棕色的稳重可靠，适配需要温馨可靠的场景（如家庭聚会、传统聚会），能营造出温馨踏实的氛围。" },
+            "3-15": { title: "温柔共情+神秘力量", desc: "既有粉色的温柔共情，又有黑色的强大气场，适配需要柔中带刚的场景（如女性力量主题、柔性领导力），能展现温柔中的力量。" },
+            "3-16": { title: "温柔共情+沉稳疗愈", desc: "既有粉色的温柔共情，又有墨绿的沉稳疗愈，适配需要深度疗愈的场景（如心灵疗愈、冥想工坊），能营造出最温柔深沉的疗愈空间。" },
+
+            // 玫红色系列（4号）
+            "4-5": { title: "热烈激情+深沉力量", desc: "双重深沉力量，既有玫红的浓烈激情又有暗红的坚定意志，适配需要强大感染力的场景（如激情演讲、决战时刻），能凝聚最强大的气场。" },
+            "4-6": { title: "热烈激情+温柔梦想", desc: "既有玫红的热烈激情，又有淡紫的梦幻浪漫，适配需要激情与浪漫的场景（如浪漫求婚、梦幻婚礼），能营造出最浪漫激情的氛围。" },
+            "4-8": { title: "热烈激情+乐观温暖", desc: "既有玫红的浓烈激情，又有黄色的明亮温暖，适配需要热情洋溢的场景（如节日庆典、欢庆盛典），能让现场充满激情与欢乐。" },
+            "4-9": { title: "热烈激情+清爽松弛", desc: "既有玫红的热烈激情，又有浅蓝的清爽松弛，适配需要激情但不紧张的场景（如海边派对、夏日狂欢），能让激情在轻松中释放。" },
+            "4-10": { title: "热烈激情+沉稳智慧", desc: "既有玫红的浓烈激情，又有深蓝的理性智慧，适配需要激情与理性的场景（如辩论赛、策略竞技），能在激情中保持清醒。" },
+            "4-11": { title: "热烈激情+自然治愈", desc: "既有玫红的热烈激情，又有绿色的自然生机，适配需要激情与自然的场景（如户外音乐节、自然艺术节），能让激情在自然中绽放。" },
+            "4-12": { title: "热烈激情+清新沟通", desc: "既有玫红的热烈激情，又有青色的清爽沟通，适配需要激情互动的场景（如热烈讨论会、激情分享会），能让交流既热烈又清晰。" },
+            "4-13": { title: "热烈激情+踏实可靠", desc: "既有玫红的热烈激情，又有棕色的稳重踏实，适配需要激情落地的场景（如激情创业、项目启动），能让激情转化为实际行动。" },
+            "4-14": { title: "热烈激情+包容协调", desc: "既有玫红的热烈激情，又有白色的包容协调，适配需要激情包容的场景（如多元艺术节、包容性庆典），能让激情中包含接纳。" },
+            "4-15": { title: "热烈激情+神秘力量", desc: "既有玫红的浓烈激情，又有黑色的强大气场，适配需要极致气场的场景（如高端时装秀、艺术首映），能营造出震撼的氛围。" },
+            "4-16": { title: "热烈激情+沉稳疗愈", desc: "既有玫红的热烈激情，又有墨绿的沉稳疗愈，适配需要激情与沉稳的场景（如艺术疗愈、情感释放），能让激情在沉稳中升华。" },
+
+            // 暗红色系列（5号）
+            "5-6": { title: "深沉力量+温柔梦想", desc: "既有暗红的坚定意志，又有淡紫的梦幻浪漫，适配需要力量与柔美的场景（如女性领导力、梦想实现），能展现刚柔并济的力量。" },
+            "5-7": { title: "深沉力量+神秘优雅", desc: "既有暗红的深沉力量，又有紫色的神秘优雅，适配需要深沉气场的场景（如高端品鉴、私密雅集），能营造出深邃高贵的氛围。" },
+            "5-8": { title: "深沉力量+乐观温暖", desc: "既有暗红的坚定意志，又有黄色的明亮温暖，适配需要坚定但温暖的场景（如励志教育、成长激励），能用温暖传递坚定的力量。" },
+            "5-9": { title: "深沉力量+清爽松弛", desc: "既有暗红的深沉力量，又有浅蓝的清爽松弛，适配需要力量但不压迫的场景（如领导力培训、轻松指导），能展现从容的力量。" },
+            "5-10": { title: "深沉力量+沉稳智慧", desc: "双重深沉气场，既有暗红的坚定意志又有深蓝的理性智慧，适配需要强大气场的场景（如战略决策、高层会晤），能营造出最强大的决策氛围。" },
+            "5-11": { title: "深沉力量+自然治愈", desc: "既有暗红的深沉力量，又有绿色的自然生机，适配需要力量与自然的场景（如传统武术、自然修行），能展现自然中的力量。" },
+            "5-12": { title: "深沉力量+清新沟通", desc: "既有暗红的坚定意志，又有青色的清爽沟通，适配需要坚定但清晰的场景（如决策说明会、方向指引），能用清晰传达坚定。" },
+            "5-13": { title: "深沉力量+踏实可靠", desc: "双重稳重力量，既有暗红的坚定意志又有棕色的踏实可靠，适配需要绝对稳定的场景（如基石项目、长期规划），能营造出最可靠的氛围。" },
+            "5-14": { title: "深沉力量+包容协调", desc: "既有暗红的深沉力量，又有白色的包容协调，适配需要力量与包容的场景（如多元领导、包容性决策），能展现包容中的力量。" },
+            "5-15": { title: "深沉力量+神秘力量", desc: "双重强大气场，既有暗红的坚定意志又有黑色的神秘力量，适配需要极强气场的场景（如权威发布、重大决策），能营造出最震撼的气场。" },
+            "5-16": { title: "深沉力量+沉稳疗愈", desc: "既有暗红的深沉力量，又有墨绿的沉稳疗愈，适配需要深沉稳定的场景（如古法养生、传统修行），能营造出最深沉稳定的氛围。" },
+
+            // 淡紫色系列（6号）
+            "6-7": { title: "温柔梦想+神秘优雅", desc: "双重优雅浪漫，既有淡紫的梦幻柔美又有紫色的神秘优雅，适配需要极致浪漫的场景（如梦幻婚礼、浪漫盛典），能营造出最浪漫优雅的氛围。" },
+            "6-8": { title: "温柔梦想+乐观温暖", desc: "既有淡紫的梦幻浪漫，又有黄色的明亮温暖，适配需要温暖梦幻的场景（如童话主题、梦想庆典），能营造出最温暖梦幻的氛围。" },
+            "6-9": { title: "温柔梦想+清爽松弛", desc: "既有淡紫的梦幻浪漫，又有浅蓝的清爽松弛，适配需要梦幻舒适的场景（如梦幻下午茶、浪漫野餐），能营造出最轻松梦幻的氛围。" },
+            "6-10": { title: "温柔梦想+沉稳智慧", desc: "既有淡紫的梦幻浪漫，又有深蓝的理性智慧，适配需要梦想与理性的场景（如梦想规划、愿景设计），能让梦想更有方向。" },
+            "6-11": { title: "温柔梦想+自然治愈", desc: "既有淡紫的梦幻浪漫，又有绿色的自然治愈，适配需要梦幻自然的场景（如花园派对、自然婚礼），能营造出最治愈梦幻的氛围。" },
+            "6-12": { title: "温柔梦想+清新沟通", desc: "既有淡紫的梦幻浪漫，又有青色的清爽沟通，适配需要梦幻但清晰的场景（如梦想分享会、愿景交流），能让梦想清晰传递。" },
+            "6-13": { title: "温柔梦想+踏实可靠", desc: "既有淡紫的梦幻浪漫，又有棕色的踏实可靠，适配需要梦想落地的场景（如梦想实现计划、愿景实施），能让梦想变为现实。" },
+            "6-14": { title: "温柔梦想+包容协调", desc: "既有淡紫的梦幻浪漫，又有白色的包容协调，适配需要包容梦想的场景（如多元梦想分享、愿景融合），能让每个梦想都被看见。" },
+            "6-15": { title: "温柔梦想+神秘力量", desc: "既有淡紫的梦幻浪漫，又有黑色的强大气场，适配需要梦幻又有力量的场景（如高端梦幻秀、艺术盛典），能营造出独特的梦幻气场。" },
+            "6-16": { title: "温柔梦想+沉稳疗愈", desc: "既有淡紫的梦幻浪漫，又有墨绿的沉稳疗愈，适配需要深度梦幻的场景（如冥想工坊、心灵疗愈），能营造出最深沉梦幻的疗愈空间。" },
+
+            // 紫色系列（7号）
+            "7-8": { title: "神秘优雅+乐观温暖", desc: "既有紫色的神秘优雅，又有黄色的明亮温暖，适配需要优雅但温暖的场景（如雅致聚会、高雅茶会），能营造出温暖优雅的氛围。" },
+            "7-9": { title: "神秘优雅+清爽松弛", desc: "既有紫色的神秘优雅，又有浅蓝的清爽松弛，适配需要优雅舒适的场景（如雅致下午茶、优雅聚会），能营造出最舒适优雅的氛围。" },
+            "7-10": { title: "神秘优雅+沉稳智慧", desc: "既有紫色的神秘优雅，又有深蓝的理性智慧，适配需要高雅智慧的场景（如学术沙龙、艺术鉴赏），能营造出最有深度的优雅氛围。" },
+            "7-11": { title: "神秘优雅+自然治愈", desc: "既有紫色的神秘优雅，又有绿色的自然治愈，适配需要优雅自然的场景（如花园雅集、自然艺术），能营造出最自然优雅的氛围。" },
+            "7-12": { title: "神秘优雅+清新沟通", desc: "既有紫色的神秘优雅，又有青色的清爽沟通，适配需要优雅交流的场景（如艺术交流会、雅致座谈），能让交流既优雅又顺畅。" },
+            "7-13": { title: "神秘优雅+踏实可靠", desc: "既有紫色的神秘优雅，又有棕色的踏实可靠，适配需要优雅稳重的场景（如传统雅集、经典品鉴），能营造出最稳重优雅的氛围。" },
+            "7-14": { title: "神秘优雅+包容协调", desc: "既有紫色的神秘优雅，又有白色的包容协调，适配需要优雅包容的场景（如多元艺术节、国际交流），能营造出最包容优雅的氛围。" },
+            "7-15": { title: "神秘优雅+神秘力量", desc: "双重神秘气场，既有紫色的优雅神秘又有黑色的强大力量，适配需要极致气场的场景（如高端时装秀、奢华盛典），能营造出最震撼的神秘氛围。" },
+            "7-16": { title: "神秘优雅+沉稳疗愈", desc: "既有紫色的神秘优雅，又有墨绿的沉稳疗愈，适配需要深度优雅的场景（如冥想艺术、禅意空间），能营造出最深沉优雅的疗愈氛围。" },
+
+            // 黄色系列（8号）
+            "8-9": { title: "乐观温暖+清爽松弛", desc: "既有黄色的明亮温暖，又有浅蓝的清爽松弛，适配需要阳光舒适的场景（如夏日派对、海边聚会），能营造出最舒适阳光的氛围。" },
+            "8-10": { title: "乐观温暖+沉稳智慧", desc: "既有黄色的明亮乐观，又有深蓝的理性智慧，适配需要乐观但有深度的场景（如励志教育、智慧分享），能用智慧传递乐观。" },
+            "8-11": { title: "乐观温暖+自然治愈", desc: "既有黄色的明亮温暖，又有绿色的自然治愈，适配需要阳光自然的场景（如户外野餐、田园活动），能营造出最阳光治愈的氛围。" },
+            "8-12": { title: "乐观温暖+清新沟通", desc: "既有黄色的明亮乐观，又有青色的清爽沟通，适配需要阳光顺畅的场景（如积极交流会、阳光座谈），能让交流既阳光又高效。" },
+            "8-13": { title: "乐观温暖+踏实可靠", desc: "既有黄色的明亮温暖，又有棕色的踏实可靠，适配需要温暖可靠的场景（如家庭聚会、温馨活动），能营造出最温暖踏实的氛围。" },
+            "8-14": { title: "乐观温暖+包容协调", desc: "既有黄色的明亮温暖，又有白色的包容协调，适配需要温暖包容的场景（如多元庆典、和谐聚会），能营造出最温暖包容的氛围。" },
+            "8-15": { title: "乐观温暖+神秘力量", desc: "既有黄色的明亮温暖，又有黑色的强大气场，适配需要温暖有力的场景（如高端阳光品牌、温暖力量），能展现温暖中的力量。" },
+            "8-16": { title: "乐观温暖+沉稳疗愈", desc: "既有黄色的明亮温暖，又有墨绿的沉稳疗愈，适配需要温暖深沉的场景（如温馨疗愈、阳光养生），能营造出最温暖深沉的疗愈氛围。" },
+
+            // 浅蓝色系列（9号）
+            "9-10": { title: "清爽松弛+沉稳智慧", desc: "既有浅蓝的清爽松弛，又有深蓝的理性智慧，适配需要舒适但有深度的场景（如轻松研讨、舒适学习），能让思考在轻松中进行。" },
+            "9-13": { title: "清爽松弛+踏实可靠", desc: "既有浅蓝的清爽松弛，又有棕色的踏实可靠，适配需要舒适稳定的场景（如居家聚会、轻松团建），能营造出最舒适踏实的氛围。" },
+            "9-14": { title: "清爽松弛+包容协调", desc: "既有浅蓝的清爽松弛，又有白色的包容协调，适配需要舒适包容的场景（如和谐聚会、轻松交流），能营造出最舒适包容的氛围。" },
+            "9-15": { title: "清爽松弛+神秘力量", desc: "既有浅蓝的清爽松弛，又有黑色的强大气场，适配需要舒适又有格调的场景（如高端休闲会、轻松品鉴），能营造出轻松高级的氛围。" },
+            "9-16": { title: "清爽松弛+沉稳疗愈", desc: "既有浅蓝的清爽松弛，又有墨绿的沉稳疗愈，适配需要深度放松的场景（如冥想放松、深度疗愈），能营造出最舒适深沉的疗愈空间。" },
+
+            // 深蓝色系列（10号）
+            "10-11": { title: "沉稳智慧+自然治愈", desc: "既有深蓝的理性智慧，又有绿色的自然治愈，适配需要智慧与自然的场景（如生态教育、自然哲学），能在自然中展现智慧。" },
+            "10-12": { title: "沉稳智慧+清新沟通", desc: "既有深蓝的理性智慧，又有青色的清爽沟通，适配需要智慧清晰的场景（如学术讨论、专业交流），能让智慧清晰传递。" },
+            "10-13": { title: "沉稳智慧+踏实可靠", desc: "既有深蓝的理性智慧，又有棕色的踏实可靠，适配需要智慧稳重的场景（如战略规划、长期决策），能营造出最稳重智慧的氛围。" },
+            "10-14": { title: "沉稳智慧+包容协调", desc: "既有深蓝的理性智慧，又有白色的包容协调，适配需要智慧包容的场景（如多元决策、包容性领导），能展现包容中的智慧。" },
+            "10-16": { title: "沉稳智慧+沉稳疗愈", desc: "双重深沉智慧，既有深蓝的理性深度又有墨绿的沉稳疗愈，适配需要深度智慧的场景（如哲学探讨、深度思考），能营造出最深沉智慧的氛围。" },
+
+            // 绿色系列（11号）
+            "11-12": { title: "自然治愈+清新沟通", desc: "既有绿色的自然治愈，又有青色的清爽沟通，适配需要自然顺畅的场景（如自然交流会、生态座谈），能让交流在自然中流畅进行。" },
+            "11-13": { title: "自然治愈+踏实可靠", desc: "既有绿色的自然治愈，又有棕色的踏实可靠，适配需要自然稳定的场景（如传统农耕、自然生活），能营造出最踏实自然的氛围。" },
+            "11-14": { title: "自然治愈+包容协调", desc: "既有绿色的自然治愈，又有白色的包容协调，适配需要自然包容的场景（如生态和谐、自然共融），能营造出最包容自然的氛围。" },
+            "11-15": { title: "自然治愈+神秘力量", desc: "既有绿色的自然治愈，又有黑色的强大气场，适配需要自然力量的场景（如原始自然、野性力量），能展现自然中的强大力量。" },
+            "11-16": { title: "自然治愈+沉稳疗愈", desc: "双重自然疗愈，既有绿色的清新治愈又有墨绿的深沉疗愈，适配需要深度自然疗愈的场景（如森林疗愈、自然修行），能营造出最深沉自然的疗愈空间。" },
+
+            // 青色系列（12号）
+            "12-13": { title: "清新沟通+踏实可靠", desc: "既有青色的清爽沟通，又有棕色的踏实可靠，适配需要清晰可靠的场景（如务实交流、实际沟通），能让沟通既清晰又踏实。" },
+            "12-14": { title: "清新沟通+包容协调", desc: "既有青色的清爽沟通，又有白色的包容协调，适配需要顺畅包容的场景（如开放交流、包容对话），能让沟通既顺畅又包容。" },
+            "12-15": { title: "清新沟通+神秘力量", desc: "既有青色的清爽沟通，又有黑色的强大气场，适配需要清晰有力的场景（如高效决策会、权威沟通），能让沟通既清晰又有力。" },
+            "12-16": { title: "清新沟通+沉稳疗愈", desc: "既有青色的清爽沟通，又有墨绿的沉稳疗愈，适配需要清晰疗愈的场景（如心理咨询、疗愈沟通），能让沟通既清晰又疗愈。" },
+
+            // 棕色系列（13号）
+            "13-14": { title: "踏实可靠+包容协调", desc: "既有棕色的踏实可靠，又有白色的包容协调，适配需要稳定包容的场景（如家庭和谐、社区团结），能营造出最稳定包容的氛围。" },
+            "13-15": { title: "踏实可靠+神秘力量", desc: "既有棕色的踏实可靠，又有黑色的强大气场，适配需要稳重有力的场景（如企业根基、稳健决策），能展现稳重中的力量。" },
+
+            // 白色系列（14号）
+            "14-15": { title: "包容协调+神秘力量", desc: "既有白色的包容协调，又有黑色的强大气场，适配需要包容又有力量的场景（如多元领导、包容性决策），能展现包容中的力量。" },
+            "14-16": { title: "包容协调+沉稳疗愈", desc: "既有白色的包容协调，又有墨绿的沉稳疗愈，适配需要包容疗愈的场景（如和谐疗愈、包容性治疗），能营造出最包容疗愈的氛围。" },
+
+            // 黑色系列（15号）
+            "15-16": { title: "神秘力量+沉稳疗愈", desc: "既有黑色的强大气场，又有墨绿的沉稳疗愈，适配需要力量与疗愈的场景（如深度修行、力量疗愈），能营造出最强大深沉的疗愈力量。" }
+        };
+
+        // ==================== 结婚年龄预测题目数据 ====================
+        const marriageQuestions = [
+            { "id": 1, "q": "你会觉得自己已经老了吗？", "yes": 4, "no": 2 },
+            { "id": 2, "q": "最近很在意脸部保养这件事？", "yes": 3, "no": 10 },
+            { "id": 3, "q": "你的初恋是在高中时代开始的？", "yes": 12, "no": 11 },
+            { "id": 4, "q": "拳击摔跤这类节目你会看吗？", "yes": 6, "no": 5 },
+            { "id": 5, "q": "想过在水上办一场浪漫婚礼吗？", "yes": 7, "no": 13 },
+            { "id": 6, "q": "你有过灵魂出窍的神奇体验？", "yes": 13, "no": 8 },
+            { "id": 7, "q": "筷子掉地上，擦擦继续用？", "yes": 15, "no": 9 },
+            { "id": 8, "q": "玩过老虎机、赛马这类小赌怡情的游戏？", "yes": 15, "no": 10 },
+            { "id": 9, "q": "和异性第一次亲密接触是在二十岁之后？", "yes": 17, "no": 19 },
+            { "id": 10, "q": "咖啡的香味比口味更吸引你？", "yes": 11, "no": 17 },
+            { "id": 11, "q": "通常都是你主动打电话，很少有人找你？", "yes": 19, "no": 17 },
+            { "id": 12, "q": "别人都说你长着一张娃娃脸？", "yes": 19, "no": 11 },
+            { "id": 13, "q": "十二生肖的顺序你能倒背如流？", "yes": 22, "no": 14 },
+            { "id": 14, "q": "有三个以上的异性向你表白过？", "yes": 24, "no": 23 },
+            { "id": 15, "q": "你的屁股上有颗痣？", "yes": 16, "no": 14 },
+            { "id": 16, "q": "第一次约会就会想到结婚的事？", "yes": 24, "no": 25 },
+            { "id": 17, "q": "超想穿越到未来看看自己的样子？", "yes": 18, "no": 26 },
+            { "id": 18, "q": "参加过相亲？", "yes": 25, "no": 26 },
+            { "id": 19, "q": "家里的家具全是白色系？", "yes": 26, "no": 18 },
+            { "id": 20, "q": "出门会随身带防身喷雾或报警器？", "yes": "B", "no": "A" },
+            { "id": 21, "q": "对自己抛媚眼的本事很有信心？", "yes": "B", "no": "A" },
+            { "id": 22, "q": "你觉得26岁左右结婚最合适？", "yes": 21, "no": 2 },
+            { "id": 23, "q": "希望另一半会说英文？", "yes": "C", "no": "D" },
+            { "id": 24, "q": "超级想去爬一次万里长城？", "yes": "D", "no": "C" },
+            { "id": 25, "q": "买过一些书觉得对自己帮助特别大？", "yes": "E", "no": 23 },
+            { "id": 26, "q": "结婚后三年内不打算要孩子？", "yes": 24, "no": 25 }
+        ];
+
+        const marriageResults = {
+            "A": {
+                age: "30+",
+                title: "晚婚",
+                slogan: "慢热成诗，晚一点也愿意",
+                color: "#4a5578",
+                description: "你对感情相当谨慎，不会轻易被感情冲昏头脑。你更看重精神契合和人生规划的一致性，相信真爱值得等待。30岁之后的你更加成熟稳重，此时步入婚姻会是最佳选择。"
+            },
+            "B": {
+                age: "26-29",
+                title: "标准晚婚",
+                slogan: "刚好遇见，不早不晚",
+                color: "#52c7b8",
+                description: "你理性又不失浪漫，懂得平衡事业与爱情。这个年龄段的你已经建立了一定的经济基础，对生活有了清晰的规划。遇到对的人，你会果断携手步入婚姻殿堂。"
+            },
+            "C": {
+                age: "24-25",
+                title: "略早",
+                slogan: "阳光正好，爱也刚好",
+                color: "#ffd966",
+                description: "你对爱情充满向往，相信一见钟情和命中注定。青春年华里遇见爱情，你会勇敢地追随内心。虽然稍显年轻，但你的真诚和热情会让婚姻生活充满活力。"
+            },
+            "D": {
+                age: "22-23",
+                title: "早婚",
+                slogan: "风风火火，爱就出发",
+                color: "#ff7f50",
+                description: "你是行动派，一旦确定心意就会迅速做出决定。年轻的心让你对婚姻充满美好憧憬，虽然可能面临一些挑战，但你的热情和勇气会帮助你克服困难，共同成长。"
+            },
+            "E": {
+                age: "20-21",
+                title: "很早",
+                slogan: "一眼万年，少年已定",
+                color: "#ffb6c1",
+                description: "你相信青梅竹马和初恋的美好，对爱情有着最纯粹的向往。虽然很早就步入婚姻，但你的真诚和执着会让这份感情历久弥新。记得在爱情中也要不断成长和学习。"
+            }
+        };
+
+        // ==================== 心理年龄测试题目数据 ====================
+        const questions = [
+            {
+                id: 1,
+                question: "难得的周末时光，你最想怎么度过？",
+                options: [
+                    { text: "约上三五好友出去high，参加各种聚会活动", score: -3, dimension: "social" },
+                    { text: "窝在家里追剧看书，享受独处的小确幸", score: 0, dimension: "social" },
+                    { text: "关掉手机，给自己来场说断就断的独处时光", score: 3, dimension: "social" },
+                    { text: "做些有意义的事，比如志愿服务、学习充电", score: 5, dimension: "social" }
+                ]
+            },
+            {
+                id: 2,
+                question: "面对从未接触过的新鲜事物，你会？",
+                options: [
+                    { text: "兴奋到飞起，立马想体验一下", score: -5, dimension: "openness" },
+                    { text: "先做做功课，了解清楚再说", score: 0, dimension: "openness" },
+                    { text: "有点怵，还是熟悉的配方更让人安心", score: 3, dimension: "openness" },
+                    { text: "算了算了，老样子最舒服", score: 5, dimension: "openness" }
+                ]
+            },
+            {
+                id: 3,
+                question: "遇到棘手难题时，你的第一反应是？",
+                options: [
+                    { text: "救命！赶紧找人帮忙", score: -3, dimension: "independence" },
+                    { text: "先自己琢磨琢磨，实在不行再求助", score: 0, dimension: "independence" },
+                    { text: "独自钻研到底，不想麻烦别人", score: 3, dimension: "independence" },
+                    { text: "冷静分析，找出最优解决方案", score: 5, dimension: "independence" }
+                ]
+            },
+            {
+                id: 4,
+                question: "对于网络上的流行梗和新词，你的态度是？",
+                options: [
+                    { text: "天天挂嘴边，聊天全是梗", score: -5, dimension: "trend" },
+                    { text: "知道一些，偶尔蹦出来几个", score: -2, dimension: "trend" },
+                    { text: "听得懂但不太用，感觉有点尬", score: 2, dimension: "trend" },
+                    { text: "完全跟不上节奏，也没兴趣", score: 5, dimension: "trend" }
+                ]
+            },
+            {
+                id: 5,
+                question: "你的作息时间大概是？",
+                options: [
+                    { text: "熬夜冠军，凌晨才舍得闭眼", score: -3, dimension: "lifestyle" },
+                    { text: "看心情，有时早睡有时晚睡", score: 0, dimension: "lifestyle" },
+                    { text: "相对规律，一般11-12点入睡", score: 3, dimension: "lifestyle" },
+                    { text: "超自律，10点前准时上床", score: 5, dimension: "lifestyle" }
+                ]
+            },
+            {
+                id: 6,
+                question: "社交软件对你来说意味着？",
+                options: [
+                    { text: "手机不离手，刷到停不下来", score: -5, dimension: "digital" },
+                    { text: "每天刷几遍，保持在线状态", score: -2, dimension: "digital" },
+                    { text: "想起来才看看，不太依赖", score: 2, dimension: "digital" },
+                    { text: "几乎不用，能不装就不装", score: 5, dimension: "digital" }
+                ]
+            },
+            {
+                id: 7,
+                question: "谈到未来规划，你的心态是？",
+                options: [
+                    { text: "满脑子都是梦想和期待", score: -5, dimension: "outlook" },
+                    { text: "有一些目标在心里盘算着", score: 0, dimension: "outlook" },
+                    { text: "走一步看一步，随遇而安", score: 3, dimension: "outlook" },
+                    { text: "已经看淡一切，平平淡淡就好", score: 6, dimension: "outlook" }
+                ]
+            },
+            {
+                id: 8,
+                question: "买东西时，你最看重的是？",
+                options: [
+                    { text: "品牌够不够响，款式潮不潮", score: -3, dimension: "consumption" },
+                    { text: "性价比，好用不贵最重要", score: 0, dimension: "consumption" },
+                    { text: "耐用实用，质量得过硬", score: 3, dimension: "consumption" },
+                    { text: "能用就行，省钱才是王道", score: 5, dimension: "consumption" }
+                ]
+            },
+            {
+                id: 9,
+                question: "闲暇时间你喜欢做什么？",
+                options: [
+                    { text: "刷短视频、打游戏，爽就完了", score: -4, dimension: "hobby" },
+                    { text: "运动健身，保持活力", score: -1, dimension: "hobby" },
+                    { text: "看书学习，充实脑袋", score: 2, dimension: "hobby" },
+                    { text: "养花写字，享受传统慢生活", score: 5, dimension: "hobby" }
+                ]
+            },
+            {
+                id: 10,
+                question: "对待健康这件事，你有多上心？",
+                options: [
+                    { text: "年轻就是资本，不care", score: -4, dimension: "health" },
+                    { text: "知道要注意，但执行力不强", score: 0, dimension: "health" },
+                    { text: "挺重视的，定期体检不含糊", score: 3, dimension: "health" },
+                    { text: "养生达人，健康第一位", score: 5, dimension: "health" }
+                ]
+            },
+            {
+                id: 11,
+                question: "音乐APP里，哪种曲风最合你胃口？",
+                options: [
+                    { text: "流行歌曲、电子音乐，越燃越好", score: -4, dimension: "culture" },
+                    { text: "摇滚说唱，有态度有个性", score: -2, dimension: "culture" },
+                    { text: "轻音乐民谣，舒缓治愈", score: 2, dimension: "culture" },
+                    { text: "经典老歌，怀旧金曲永不过时", score: 5, dimension: "culture" }
+                ]
+            },
+            {
+                id: 12,
+                question: "和别人意见不合时，你会？",
+                options: [
+                    { text: "据理力争，绝不认怂", score: -3, dimension: "maturity" },
+                    { text: "说出观点后看情况", score: 0, dimension: "maturity" },
+                    { text: "不想争论，能避则避", score: 3, dimension: "maturity" },
+                    { text: "包容理解，和气生财", score: 5, dimension: "maturity" }
+                ]
+            },
+            {
+                id: 13,
+                question: "关于存钱这件事，你属于？",
+                options: [
+                    { text: "月光族，钱包比脸干净", score: -4, dimension: "finance" },
+                    { text: "有存款但也不抠门", score: 0, dimension: "finance" },
+                    { text: "有清晰的理财规划", score: 3, dimension: "finance" },
+                    { text: "省钱小能手，精打细算", score: 5, dimension: "finance" }
+                ]
+            },
+            {
+                id: 14,
+                question: "你的社交圈是什么样的？",
+                options: [
+                    { text: "朋友遍天下，社交小达人", score: -3, dimension: "relationship" },
+                    { text: "有固定的朋友圈子", score: 0, dimension: "relationship" },
+                    { text: "朋友不多，但都是真心的", score: 3, dimension: "relationship" },
+                    { text: "享受独处，不太社交", score: 5, dimension: "relationship" }
+                ]
+            },
+            {
+                id: 15,
+                question: "对于人生经历，你更追求？",
+                options: [
+                    { text: "刺激冒险，越疯狂越好", score: -5, dimension: "experience" },
+                    { text: "保持一点探险精神", score: -1, dimension: "experience" },
+                    { text: "稳中求变，不太激进", score: 2, dimension: "experience" },
+                    { text: "稳定安逸，岁月静好", score: 5, dimension: "experience" }
+                ]
+            }
+        ];
+
+        // 年龄段描述
+        const ageDescriptions = {
+            teen: {
+                range: [10, 18],
+                title: "青春活力型",
+                description: "你拥有一颗年轻的心，对世界充满好奇和热情。你热爱新鲜事物，敢于尝试，充满活力和创造力。保持这份纯真和热情，但也要学会承担责任。"
+            },
+            youngAdult: {
+                range: [19, 28],
+                title: "青年探索型",
+                description: "你正值人生的黄金时期，既有年轻的活力又开始懂得思考人生。你在探索中成长，在经历中成熟。继续保持好奇心的同时，也要建立自己的人生观。"
+            },
+            adult: {
+                range: [29, 40],
+                title: "成熟稳重型",
+                description: "你的心智已经相当成熟，懂得权衡利弊，理性思考。你在工作和生活中都能游刃有余，但也不失生活的情趣。这是人生最充实的阶段。"
+            },
+            middleAge: {
+                range: [41, 55],
+                title: "睿智沉稳型",
+                description: "你拥有丰富的人生阅历，懂得生活的真谛。你成熟、稳重、有担当，对生活有深刻的理解。你的智慧来自于经验的积累，是值得信赖的人。"
+            },
+            senior: {
+                range: [56, 100],
+                title: "豁达智慧型",
+                description: "你有着超越年龄的成熟和智慧，已经看透了许多人生道理。你平和、豁达、知足，懂得享受当下。这份淡然是人生修炼的结果，值得珍惜。"
+            }
+        };
+
+        // 维度名称映射
+        const dimensionNames = {
+            social: "社交活跃度",
+            openness: "开放接纳度",
+            independence: "独立自主性",
+            trend: "潮流追随度",
+            lifestyle: "生活规律性",
+            digital: "数字依赖度",
+            outlook: "未来展望度",
+            consumption: "消费成熟度",
+            hobby: "兴趣传统度",
+            health: "健康意识度",
+            culture: "文化偏好度",
+            maturity: "情绪成熟度",
+            finance: "理财成熟度",
+            relationship: "社交深度",
+            experience: "冒险精神度"
+        };
+
+        // ==================== 应用逻辑 ====================
+        let currentTestType = 'personality'; // 'personality', 'marriage', 'animal', 'color', 或 'answerbook'
+        let currentQuestionIndex = 0;
+        let answers = [];
+        let marriageAnswerPath = []; // 结婚年龄测试的答题路径
+        let animalAnswerPath = []; // 动物城测试的答题路径
+        let selectedColors = []; // 颜色测试选择的颜色
+        let machineCode = '';
+        let isAuthorized = false;
+
+        // API配置
+        function getApiUrl() {
+            const envConfig = getEnvConfig();
+            return `${envConfig.apiUrl}/verify`;
+        }
+
+        // DOM 元素
+        const welcomePage = document.getElementById('welcome-page');
+        const testPage = document.getElementById('test-page');
+        const resultPage = document.getElementById('result-page');
+        const marriageResultPage = document.getElementById('marriage-result-page');
+        const animalResultPage = document.getElementById('animal-result-page');
+        const colorSelectionPage = document.getElementById('color-selection-page');
+        const colorResultPage = document.getElementById('color-result-page');
+        const answerbookResultPage = document.getElementById('answerbook-result-page');
+        const answerbookGuidePage = document.getElementById('answerbook-guide-page');
+        const personalityCard = document.getElementById('personality-card');
+        const marriageCard = document.getElementById('marriage-card');
+        const animalCard = document.getElementById('animal-card');
+        const colorCard = document.getElementById('color-card');
+        const answerbookCard = document.getElementById('answerbook-card');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const marriageRestartBtn = document.getElementById('marriage-restart-btn');
+        const animalRestartBtn = document.getElementById('animal-restart-btn');
+        const answerbookRestartBtn = document.getElementById('answerbook-restart-btn');
+        const showAnswerBtn = document.getElementById('show-answer-btn');
+        const guideBackBtn = document.getElementById('guide-back-btn');
+        const testRestartBtn = document.getElementById('test-restart-btn');
+        const confirmModal = document.getElementById('confirm-modal');
+        const confirmOkBtn = document.getElementById('confirm-ok');
+        const confirmCancelBtn = document.getElementById('confirm-cancel');
+        const authModal = document.getElementById('auth-modal');
+        const authCodeInput = document.getElementById('auth-code-input');
+        const authVerifyBtn = document.getElementById('auth-verify');
+        const authCancelBtn = document.getElementById('auth-cancel');
+        const authError = document.getElementById('auth-error');
+        const authLoading = document.getElementById('auth-loading');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestionSpan = document.getElementById('current-question');
+        const totalQuestionsSpan = document.getElementById('total-questions');
+        const progressFill = document.getElementById('progress-fill');
+
+        // 初始化
+        function init() {
+            totalQuestionsSpan.textContent = questions.length;
+            machineCode = generateMachineCode();
+
+            personalityCard.addEventListener('click', () => startTestByType('personality'));
+            marriageCard.addEventListener('click', () => startTestByType('marriage'));
+            animalCard.addEventListener('click', () => startTestByType('animal'));
+            colorCard.addEventListener('click', () => startTestByType('color'));
+            answerbookCard.addEventListener('click', () => startTestByType('answerbook'));
+            prevBtn.addEventListener('click', previousQuestion);
+            nextBtn.addEventListener('click', nextQuestion);
+            restartBtn.addEventListener('click', restart);
+            marriageRestartBtn.addEventListener('click', restart);
+            animalRestartBtn.addEventListener('click', restart);
+            answerbookRestartBtn.addEventListener('click', restart);
+            showAnswerBtn.addEventListener('click', showRandomAnswer);
+            guideBackBtn.addEventListener('click', restart);
+            testRestartBtn.addEventListener('click', showConfirmModal);
+            confirmOkBtn.addEventListener('click', handleConfirmOk);
+            confirmCancelBtn.addEventListener('click', hideConfirmModal);
+            authVerifyBtn.addEventListener('click', verifyAuthCode);
+            authCancelBtn.addEventListener('click', hideAuthModal);
+
+            confirmModal.addEventListener('click', (e) => {
+                if (e.target === confirmModal) {
+                    hideConfirmModal();
+                }
+            });
+
+            authCodeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    verifyAuthCode();
+                }
+            });
+
+            // 颜色测试相关事件
+            initColorTest();
+        }
+
+        // 根据类型启动测试
+        function startTestByType(type) {
+            currentTestType = type;
+            showAuthModal();
+        }
+
+        // 生成机器码
+        function generateMachineCode() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillText('fingerprint', 2, 2);
+            const canvasData = canvas.toDataURL();
+
+            const browserInfo = [
+                navigator.userAgent,
+                navigator.language,
+                new Date().getTimezoneOffset(),
+                screen.width + 'x' + screen.height,
+                screen.colorDepth,
+                canvasData
+            ].join('|');
+
+            let hash = 0;
+            for (let i = 0; i < browserInfo.length; i++) {
+                const char = browserInfo.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+
+            const machineId = Math.abs(hash).toString(16).toUpperCase().padStart(12, '0');
+            return machineId.match(/.{1,4}/g).join('-');
+        }
+
+        // 显示授权对话框
+        function showAuthModal() {
+            authModal.classList.add('active');
+            authCodeInput.value = '';
+            authError.textContent = '';
+            authCodeInput.focus();
+        }
+
+        // 隐藏授权对话框
+        function hideAuthModal() {
+            authModal.classList.remove('active');
+        }
+
+        // 验证授权码
+        async function verifyAuthCode() {
+            const authCode = authCodeInput.value.trim();
+
+            if (!authCode) {
+                authError.textContent = '请输入授权码';
+                return;
+            }
+
+            // 根据测试类型验证不同的授权码
+            const authCodes = {
+                'personality': '888666',  // 心理年龄测试
+                'animal': '010203',       // 动物城人格测试
+                'marriage': '030402',     // 结婚年龄预测
+                'color': '666888',        // 颜色天赋测试
+                'answerbook': '999888'    // 答案之书
+            };
+
+            if (authCode === authCodes[currentTestType]) {
+                console.log(`✅ 使用${currentTestType}测试授权码，验证通过`);
+                isAuthorized = true;
+                hideAuthModal();
+                startTest();
+                return;
+            }
+
+            authLoading.classList.add('active');
+            authError.textContent = '';
+
+            try {
+                const response = await fetch(getApiUrl(), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        authCode: authCode,
+                        machineCode: machineCode
+                    })
+                });
+
+                const data = await response.json();
+                authLoading.classList.remove('active');
+
+                if (data.success) {
+                    isAuthorized = true;
+                    hideAuthModal();
+                    startTest();
+                } else {
+                    authError.textContent = data.message || '授权验证失败';
+                }
+            } catch (error) {
+                authLoading.classList.remove('active');
+                authError.textContent = '网络错误，请检查后端服务是否启动';
+                console.error('验证错误:', error);
+            }
+        }
+
+        // 开始测试
+        function startTest() {
+            if (!isAuthorized) {
+                showAuthModal();
+                return;
+            }
+
+            // 如果是颜色测试，直接显示颜色选择页面
+            if (currentTestType === 'color') {
+                showPage(colorSelectionPage);
+                renderColorGrid();
+                return;
+            }
+
+            // 如果是答案之书，显示使用方法引导页
+            if (currentTestType === 'answerbook') {
+                showPage(answerbookGuidePage);
+                return;
+            }
+
+            showPage(testPage);
+            currentQuestionIndex = 0;
+
+            if (currentTestType === 'personality') {
+                answers = new Array(questions.length).fill(null);
+                totalQuestionsSpan.textContent = questions.length;
+            } else if (currentTestType === 'marriage') {
+                marriageAnswerPath = [1]; // 从第1题开始
+                totalQuestionsSpan.textContent = '?'; // 不确定总题数
+            } else if (currentTestType === 'animal') {
+                animalAnswerPath = [1]; // 从第1题开始
+                totalQuestionsSpan.textContent = '?';
+            }
+
+            displayQuestion();
+        }
+
+        // 显示页面
+        function showPage(page) {
+            [welcomePage, testPage, resultPage, marriageResultPage, animalResultPage, colorSelectionPage, colorResultPage, answerbookResultPage, answerbookGuidePage].forEach(p => p.classList.remove('active'));
+            page.classList.add('active');
+        }
+
+        // 显示问题
+        function displayQuestion() {
+            if (currentTestType === 'personality') {
+                displayPersonalityQuestion();
+            } else if (currentTestType === 'marriage') {
+                displayMarriageQuestion();
+            } else if (currentTestType === 'animal') {
+                displayAnimalQuestion();
+            }
+        }
+
+        // 显示心理年龄测试问题
+        function displayPersonalityQuestion() {
+            const question = questions[currentQuestionIndex];
+            questionText.textContent = question.question;
+
+            currentQuestionSpan.textContent = currentQuestionIndex + 1;
+
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressFill.style.width = progress + '%';
+
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option.text;
+
+                if (answers[currentQuestionIndex] === index) {
+                    button.classList.add('selected');
+                }
+
+                button.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(button);
+            });
+
+            updateNavigationButtons();
+        }
+
+        // 显示结婚年龄预测问题
+        function displayMarriageQuestion() {
+            const currentId = marriageAnswerPath[marriageAnswerPath.length - 1];
+            const question = marriageQuestions.find(q => q.id === currentId);
+
+            if (!question) {
+                console.error('找不到题目:', currentId);
+                return;
+            }
+
+            questionText.textContent = question.q;
+            currentQuestionSpan.textContent = marriageAnswerPath.length;
+
+            // 进度条显示当前已答题数
+            const progress = Math.min((marriageAnswerPath.length / 26) * 100, 100);
+            progressFill.style.width = progress + '%';
+
+            optionsContainer.innerHTML = '';
+
+            // 创建"是"和"否"按钮
+            ['是', '否'].forEach((text, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = text;
+                button.addEventListener('click', () => handleMarriageAnswer(index === 0));
+                optionsContainer.appendChild(button);
+            });
+
+            // 结婚年龄测试不需要上一题按钮
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        }
+
+        // 处理结婚年龄测试的答案
+        function handleMarriageAnswer(isYes) {
+            const currentId = marriageAnswerPath[marriageAnswerPath.length - 1];
+            const question = marriageQuestions.find(q => q.id === currentId);
+
+            const nextValue = isYes ? question.yes : question.no;
+
+            // 如果下一个值是字母，说明到达结果
+            if (typeof nextValue === 'string') {
+                showMarriageResult(nextValue);
+            } else {
+                // 否则继续下一题
+                marriageAnswerPath.push(nextValue);
+                displayMarriageQuestion();
+            }
+        }
+
+        // 显示结婚年龄测试结果
+        function showMarriageResult(resultKey) {
+            const result = marriageResults[resultKey];
+
+            document.getElementById('marriage-age').textContent = result.age;
+            document.getElementById('marriage-title').textContent = result.slogan;
+            document.getElementById('marriage-analysis').textContent = result.description;
+
+            // 设置结果卡片的颜色
+            const resultCard = document.getElementById('marriage-result-card');
+            resultCard.style.background = `linear-gradient(135deg, ${result.color} 0%, ${adjustColor(result.color, -20)} 100%)`;
+
+            showPage(marriageResultPage);
+        }
+
+        // 显示动物城测试问题
+        function displayAnimalQuestion() {
+            const currentId = animalAnswerPath[animalAnswerPath.length - 1];
+            const question = animalQuestions.find(q => q.id === currentId);
+
+            if (!question) {
+                console.error('找不到题目:', currentId);
+                return;
+            }
+
+            questionText.textContent = question.q;
+            currentQuestionSpan.textContent = animalAnswerPath.length;
+
+            // 进度条显示当前已答题数
+            const progress = Math.min((animalAnswerPath.length / 25) * 100, 100);
+            progressFill.style.width = progress + '%';
+
+            optionsContainer.innerHTML = '';
+
+            // 创建"是"和"否"按钮
+            ['是', '否'].forEach((text, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = text;
+                button.addEventListener('click', () => handleAnimalAnswer(index === 0));
+                optionsContainer.appendChild(button);
+            });
+
+            // 动物城测试不需要上一题按钮
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        }
+
+        // 处理动物城测试的答案
+        function handleAnimalAnswer(isYes) {
+            const currentId = animalAnswerPath[animalAnswerPath.length - 1];
+            const question = animalQuestions.find(q => q.id === currentId);
+
+            const nextValue = isYes ? question.yes : question.no;
+
+            // 如果下一个值是字母，说明到达结果
+            if (typeof nextValue === 'string') {
+                showAnimalResult(nextValue);
+            } else {
+                // 否则继续下一题
+                animalAnswerPath.push(nextValue);
+                displayAnimalQuestion();
+            }
+        }
+
+        // 显示动物城测试结果
+        function showAnimalResult(resultKey) {
+            const result = animalResults[resultKey];
+
+            document.getElementById('animal-emoji').textContent = result.emoji;
+            document.getElementById('animal-role').textContent = result.role;
+            document.getElementById('animal-tag').textContent = result.tag;
+            document.getElementById('animal-analysis').textContent = result.description;
+
+            // 设置结果卡片的颜色（渐变）
+            const resultCard = document.getElementById('animal-result-card');
+            resultCard.style.background = `linear-gradient(135deg, ${result.color[0]} 0%, ${result.color[1]} 100%)`;
+
+            showPage(animalResultPage);
+        }
+
+        // 调整颜色亮度
+        function adjustColor(color, amount) {
+            const clamp = (val) => Math.min(Math.max(val, 0), 255);
+            const num = parseInt(color.replace('#', ''), 16);
+            const r = clamp((num >> 16) + amount);
+            const g = clamp(((num >> 8) & 0x00FF) + amount);
+            const b = clamp((num & 0x0000FF) + amount);
+            return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+        }
+
+        // 选择选项（心理年龄测试）
+        function selectOption(optionIndex) {
+            answers[currentQuestionIndex] = optionIndex;
+
+            const optionButtons = optionsContainer.querySelectorAll('.option-btn');
+            optionButtons.forEach((btn, index) => {
+                if (index === optionIndex) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+
+            updateNavigationButtons();
+        }
+
+        // 更新导航按钮
+        function updateNavigationButtons() {
+            // 显示按钮（心理年龄测试才需要）
+            prevBtn.style.display = 'block';
+            nextBtn.style.display = 'block';
+
+            prevBtn.disabled = currentQuestionIndex === 0;
+
+            const hasAnswer = answers[currentQuestionIndex] !== null;
+            const isLastQuestion = currentQuestionIndex === questions.length - 1;
+
+            if (isLastQuestion && hasAnswer) {
+                nextBtn.textContent = '查看结果';
+                nextBtn.disabled = false;
+            } else {
+                nextBtn.textContent = '下一题';
+                nextBtn.disabled = !hasAnswer;
+            }
+        }
+
+        // 上一题
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        // 下一题
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // 计算心理年龄
+        function calculateMentalAge() {
+            let totalScore = 0;
+            const dimensionScores = {};
+
+            answers.forEach((answerIndex, questionIndex) => {
+                const question = questions[questionIndex];
+                const selectedOption = question.options[answerIndex];
+
+                totalScore += selectedOption.score;
+
+                const dimension = selectedOption.dimension;
+                if (!dimensionScores[dimension]) {
+                    dimensionScores[dimension] = [];
+                }
+                dimensionScores[dimension].push(selectedOption.score);
+            });
+
+            const ageAdjustment = totalScore * 0.5;
+            const mentalAge = Math.max(10, Math.min(100, Math.round(25 + ageAdjustment)));
+
+            const dimensionAverages = {};
+            Object.keys(dimensionScores).forEach(dimension => {
+                const scores = dimensionScores[dimension];
+                const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+                dimensionAverages[dimension] = Math.round(((avgScore + 5) / 11) * 100);
+            });
+
+            return {
+                mentalAge,
+                dimensionScores: dimensionAverages,
+                totalScore
+            };
+        }
+
+        // 获取年龄段描述
+        function getAgeDescription(age) {
+            for (let key in ageDescriptions) {
+                const desc = ageDescriptions[key];
+                if (age >= desc.range[0] && age <= desc.range[1]) {
+                    return desc;
+                }
+            }
+            return ageDescriptions.adult;
+        }
+
+        // 显示结果
+        function showResults() {
+            const result = calculateMentalAge();
+            const ageDesc = getAgeDescription(result.mentalAge);
+
+            document.getElementById('mental-age').textContent = result.mentalAge;
+
+            const comparisonText = document.getElementById('age-comparison-text');
+            comparisonText.textContent = `${ageDesc.title}`;
+
+            const personalityAnalysis = document.getElementById('personality-analysis');
+            personalityAnalysis.textContent = ageDesc.description;
+
+            const dimensionsAnalysis = document.getElementById('dimensions-analysis');
+            dimensionsAnalysis.innerHTML = '';
+
+            const sortedDimensions = Object.entries(result.dimensionScores)
+                .sort((a, b) => Math.abs(b[1] - 50) - Math.abs(a[1] - 50))
+                .slice(0, 5);
+
+            sortedDimensions.forEach(([dimension, score], index) => {
+                const dimensionItem = document.createElement('div');
+                dimensionItem.className = 'dimension-item';
+
+                const label = document.createElement('div');
+                label.className = 'dimension-label';
+                label.textContent = dimensionNames[dimension] || dimension;
+
+                const barContainer = document.createElement('div');
+                barContainer.className = 'dimension-bar';
+
+                const barFill = document.createElement('div');
+                barFill.className = 'dimension-fill';
+                barFill.style.width = '0%';
+
+                const scoreText = document.createElement('span');
+                scoreText.className = 'dimension-score';
+                scoreText.textContent = '';
+                barFill.appendChild(scoreText);
+
+                barContainer.appendChild(barFill);
+                dimensionItem.appendChild(label);
+                dimensionItem.appendChild(barContainer);
+                dimensionsAnalysis.appendChild(dimensionItem);
+
+                setTimeout(() => {
+                    barFill.style.width = score + '%';
+                    scoreText.textContent = score + '%';
+                }, 300 + index * 150);
+            });
+
+            showPage(resultPage);
+        }
+
+        // 重新开始
+        function restart() {
+            currentQuestionIndex = 0;
+            answers = [];
+            showPage(welcomePage);
+        }
+
+        // 显示确认对话框
+        function showConfirmModal() {
+            confirmModal.classList.add('active');
+        }
+
+        // 隐藏确认对话框
+        function hideConfirmModal() {
+            confirmModal.classList.remove('active');
+        }
+
+        // 确认重新开始
+        function handleConfirmOk() {
+            hideConfirmModal();
+            restart();
+        }
+
+        // ==================== 颜色测试相关函数 ====================
+
+        // 初始化颜色测试
+        function initColorTest() {
+            const colorGrid = document.getElementById('color-grid');
+            const colorSubmitBtn = document.getElementById('color-submit-btn');
+            const colorRestartBtn = document.getElementById('color-restart-btn');
+            const colorResultRestartBtn = document.getElementById('color-result-restart-btn');
+
+            colorSubmitBtn.addEventListener('click', submitColorSelection);
+            colorRestartBtn.addEventListener('click', resetColorSelection);
+            colorResultRestartBtn.addEventListener('click', restart);
+        }
+
+        // 渲染颜色网格
+        function renderColorGrid() {
+            const colorGrid = document.getElementById('color-grid');
+            colorGrid.innerHTML = '';
+            selectedColors = [];
+
+            colors.forEach(color => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+                colorItem.style.background = color.gradient;
+
+                colorItem.innerHTML = `
+                    <div class="color-circle" style="background: ${color.code};${color.id === 14 ? ' border: 2px solid #ddd;' : ''}"></div>
+                    <div class="color-name">${color.name}</div>
+                    <div class="color-number">${color.id}号</div>
+                `;
+
+                colorItem.addEventListener('click', () => toggleColorSelection(color.id, colorItem));
+                colorGrid.appendChild(colorItem);
+            });
+
+            updateSelectedCount();
+        }
+
+        // 切换颜色选择
+        function toggleColorSelection(colorId, colorItem) {
+            const index = selectedColors.indexOf(colorId);
+
+            if (index > -1) {
+                // 取消选择
+                selectedColors.splice(index, 1);
+                colorItem.classList.remove('selected');
+            } else {
+                // 选择颜色
+                if (selectedColors.length < 2) {
+                    selectedColors.push(colorId);
+                    colorItem.classList.add('selected');
+                } else {
+                    // 已选择2个，替换第一个
+                    const firstColorId = selectedColors[0];
+                    const firstColorItem = document.querySelector(`.color-item:nth-child(${firstColorId})`);
+                    if (firstColorItem) {
+                        firstColorItem.classList.remove('selected');
+                    }
+                    selectedColors.shift();
+                    selectedColors.push(colorId);
+                    colorItem.classList.add('selected');
+                }
+            }
+
+            updateSelectedCount();
+        }
+
+        // 更新已选择数量
+        function updateSelectedCount() {
+            const selectedCount = document.getElementById('selected-count');
+            const colorSubmitBtn = document.getElementById('color-submit-btn');
+
+            selectedCount.textContent = `已选择：${selectedColors.length}/2`;
+            colorSubmitBtn.disabled = selectedColors.length !== 2;
+        }
+
+        // 重置颜色选择
+        function resetColorSelection() {
+            renderColorGrid();
+        }
+
+        // 提交颜色选择
+        function submitColorSelection() {
+            if (selectedColors.length !== 2) return;
+
+            const [color1Id, color2Id] = selectedColors.sort((a, b) => a - b);
+            const color1 = colorTalents[color1Id];
+            const color2 = colorTalents[color2Id];
+
+            // 查找组合
+            const comboKey1 = `${color1Id}-${color2Id}`;
+            const comboKey2 = `${color2Id}-${color1Id}`;
+            const combo = colorCombos[comboKey1] || colorCombos[comboKey2];
+
+            // 填充结果
+            document.getElementById('color-combo-title').textContent =
+                `${color1.name}（${color1Id}号）+ ${color2.name}（${color2Id}号）`;
+
+            if (combo) {
+                document.getElementById('color-talent-title').textContent = combo.title;
+                document.getElementById('color-combo-analysis').textContent = combo.desc;
+            } else {
+                document.getElementById('color-talent-title').textContent =
+                    `${color1.trait.split('+')[0]} + ${color2.trait.split('+')[0]}`;
+                document.getElementById('color-combo-analysis').textContent =
+                    `这是一个独特的组合！${color1.name}的${color1.trait}与${color2.name}的${color2.trait}相结合，创造出独特的天赋特质。`;
+            }
+
+            document.getElementById('color-first-analysis').textContent =
+                `${color1.name}（${color1Id}号）是"${color1.trait}"：${color1.desc}`;
+            document.getElementById('color-second-analysis').textContent =
+                `${color2.name}（${color2Id}号）是"${color2.trait}"：${color2.desc}`;
+
+            showPage(colorResultPage);
+        }
+
+        // ==================== 答案之书相关函数 ====================
+
+        // 显示随机答案
+        function showRandomAnswer() {
+            // 生成随机页码 (1-318)
+            const randomIndex = Math.floor(Math.random() * answerBookData.length);
+            const pageNumber = randomIndex + 1;
+            const answer = answerBookData[randomIndex];
+
+            // 显示答案
+            document.getElementById('answer-page-number').textContent = pageNumber;
+            document.getElementById('answer-text').textContent = answer;
+
+            showPage(answerbookResultPage);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
